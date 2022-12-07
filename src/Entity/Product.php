@@ -26,7 +26,11 @@ class Product
     #[ORM\Column(type: Types::TEXT)]
     private ?string $description = null;
 
-    #[ORM\Column(length: 255)]
+
+    #[ORM\Column]
+    private ?float $Price = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
     private ?string $brand = null;
 
     public function getId(): ?int
@@ -82,12 +86,24 @@ class Product
         return $this;
     }
 
+    public function getPrice(): ?float
+    {
+        return $this->Price;
+    }
+
+    public function setPrice(float $Price): self
+    {
+        $this->Price = $Price;
+
+        return $this;
+    }
+
     public function getBrand(): ?string
     {
         return $this->brand;
     }
 
-    public function setBrand(string $brand): self
+    public function setBrand(?string $brand): self
     {
         $this->brand = $brand;
 
