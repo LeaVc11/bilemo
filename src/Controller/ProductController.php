@@ -23,13 +23,13 @@ class ProductController extends AbstractController
         $jsonProductList = $serializer->serialize($productList, 'json', ['groups' => 'getProducts']);
         return new JsonResponse($jsonProductList, Response::HTTP_OK, [], true);
     }
-    #[Route('/{id}', name: 'detailProduct' , methods: ['GET'])]
+    #[Route('/edit/{id}', name: 'detailProduct' , methods: ['GET'])]
     public function getProductDetail(Product $product, SerializerInterface $serializer): JsonResponse
     {
         $jsonProduct = $serializer->serialize($product, 'json',['groups' => 'getProducts']);
         return new JsonResponse($jsonProduct, Response::HTTP_OK, [], true);
     }
-    #[Route('/{id}', name: 'deleteProduct' , methods: ['DELETE'])]
+    #[Route('/delete/{id}', name: 'deleteProduct' , methods: ['DELETE'])]
     public function DeleteProduct(Product $product, EntityManagerInterface $em): JsonResponse
     {
         $em->remove($product);
