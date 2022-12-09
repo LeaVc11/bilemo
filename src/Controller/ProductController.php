@@ -15,17 +15,18 @@ use Symfony\Component\Serializer\SerializerInterface;
 #[Route('/api/products', name: 'product_')]
 class ProductController extends AbstractController
 {
-    #[Route('', name: 'app_product' , methods: ['GET'])]
-    public function getProductList(ProductRepository $productRepository, SerializerInterface $serializer): JsonResponse
+    #[Route('', name: 'products' , methods: ['GET'])]
+    public function getAllProducts(ProductRepository $productRepository, SerializerInterface $serializer): JsonResponse
     {
         $productList = $productRepository->findAll();
-        $jsonProductList = $serializer->serialize($productList, 'json');
+
+        $jsonProductList = $serializer->serialize($productList, 'json', ['groups' => 'getProducts']);
         return new JsonResponse($jsonProductList, Response::HTTP_OK, [], true);
     }
     #[Route('/{id}', name: 'detailProduct' , methods: ['GET'])]
     public function getProductDetail(Product $product, SerializerInterface $serializer): JsonResponse
     {
-        $jsonProduct = $serializer->serialize($product, 'json');
+        $jsonProduct = $serializer->serialize($product, 'json',['groups' => 'getProducts']);
         return new JsonResponse($jsonProduct, Response::HTTP_OK, [], true);
     }
     #[Route('/{id}', name: 'deleteProduct' , methods: ['DELETE'])]
