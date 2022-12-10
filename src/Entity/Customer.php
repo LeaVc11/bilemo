@@ -47,12 +47,12 @@ class Customer
         return $this;
     }
 
-    public function getOwner(): ?self
+    public function getOwner(): ?User
     {
         return $this->owner;
     }
 
-    public function setOwner(?self $owner): self
+    public function setOwner(?User $owner): self
     {
         $this->owner = $owner;
 
@@ -100,4 +100,6 @@ class Customer
 
         return $this;
     }
+
+
 }
