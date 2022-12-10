@@ -11,7 +11,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
-class User extends \App\Entity\Customer implements UserInterface, PasswordAuthenticatedUserInterface
+class User extends Customer implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -37,11 +37,6 @@ class User extends \App\Entity\Customer implements UserInterface, PasswordAuthen
     #[Groups(['getUsers'])]
     private ?string $companyName = null;
 
-
-    public function getId(): ?int
-    {
-        return $this->id;
-    }
 
     public function getEmail(): ?string
     {

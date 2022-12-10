@@ -26,8 +26,7 @@ class CustomerRepository extends ServiceEntityRepository
 
         if ($flush) {
             $this->getEntityManager()->flush();
-        }
-    }
+        }    }
 
     public function save(Customer $entity, bool $flush = false): void
     {
