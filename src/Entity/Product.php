@@ -18,6 +18,7 @@ class Product
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank(message: "Le nom est obligatoire")]
     #[Groups(["getProducts"])]
     private ?string $name = null;
 
