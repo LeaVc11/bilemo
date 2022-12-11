@@ -18,12 +18,12 @@ class Customer
     #[ORM\Column(length: 255)]
     private ?string $name = null;
 
-    #[ORM\ManyToOne(inversedBy: 'customers')]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?User $owner = null;
 
     #[ORM\Column(length: 255)]
     private ?string $email = null;
+
+    #[ORM\ManyToOne(inversedBy: 'customer')]
+    private ?User $user = null;
 
     public function __construct()
     {
@@ -47,48 +47,6 @@ class Customer
         return $this;
     }
 
-    public function getOwner(): ?self
-    {
-        return $this->owner;
-    }
-
-    public function setOwner(?self $owner): self
-    {
-        $this->owner = $owner;
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, self>
-     */
-    public function getCustomers(): Collection
-    {
-        return $this->customers;
-    }
-
-    public function addCustomer(self $customer): self
-    {
-        if (!$this->customers->contains($customer)) {
-            $this->customers->add($customer);
-            $customer->setOwner($this);
-        }
-
-        return $this;
-    }
-
-    public function removeCustomer(self $customer): self
-    {
-        if ($this->customers->removeElement($customer)) {
-            // set the owning side to null (unless already changed)
-            if ($customer->getOwner() === $this) {
-                $customer->setOwner(null);
-            }
-        }
-
-        return $this;
-    }
-
     public function getEmail(): ?string
     {
         return $this->email;
@@ -97,6 +55,18 @@ class Customer
     public function setEmail(string $email): self
     {
         $this->email = $email;
+
+        return $this;
+    }
+
+    public function getUser(): ?User
+    {
+        return $this->user;
+    }
+
+    public function setUser(?User $user): self
+    {
+        $this->user = $user;
 
         return $this;
     }

@@ -14,8 +14,8 @@ use Faker;
 class UsersFixtures extends Fixture
 {
 
+    public const USER_REFERENCE = 'user';
     private UserPasswordHasherInterface $hasher;
-    private Faker\Generator $faker;
 
     public function __construct(UserPasswordHasherInterface $hasher)
     {

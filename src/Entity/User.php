@@ -37,6 +37,13 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Groups(['getUsers'])]
     private ?string $companyName = null;
 
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Customer::class)]
+    private Collection $customer;
+
+    public function __construct()
+    {
+        $this->customer = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -124,28 +131,32 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     /**
-     * @return Collection<int, product>
+     * @return Collection<int, Customer>
      */
-    public function getProducts(): Collection
+    public function getCustomer(): Collection
     {
-        return $this->products;
+        return $this->customer;
     }
 
-    public function addProduct(product $product): self
+    public function addCustomer(Customer $customer): self
     {
-        if (!$this->products->contains($product)) {
-            $this->products->add($product);
+        if (!$this->customer->contains($customer)) {
+            $this->customer->add($customer);
+            $customer->setUser($this);
         }
 
         return $this;
     }
 
-    public function removeProduct(product $product): self
+    public function removeCustomer(Customer $customer): self
     {
-        $this->products->removeElement($product);
+        if ($this->customer->removeElement($customer)) {
+            // set the owning side to null (unless already changed)
+            if ($customer->getUser() === $this) {
+                $customer->setUser(null);
+            }
+        }
 
         return $this;
     }
-
-
-}
+ }
