@@ -12,6 +12,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 #[Route('/api/users', name: 'user_')]
 class UserController extends AbstractController
@@ -26,9 +27,17 @@ class UserController extends AbstractController
     }
 
     #[Route('', name: 'createUser', methods: ['POST'])]
-    public function createUser(Request $request, SerializerInterface $serializer, EntityManagerInterface $em, UserPasswordHasherInterface $userPasswordHasher): JsonResponse
+    public function createUser(Request $request, SerializerInterface $serializer, EntityManagerInterface $em,
+                               UserPasswordHasherInterface $userPasswordHasher, ValidatorInterface $validator): JsonResponse
     {
         $user = $serializer->deserialize($request->getContent(), User::class, 'json');
+
+        // On vérifie les erreurs
+        $errors = $validator->validate($user);
+        if ($errors->count() > 0) {
+            return new JsonResponse($serializer->serialize($errors, 'json'), Response::HTTP_BAD_REQUEST, [], true);
+            //throw new HttpException(JsonResponse::HTTP_BAD_REQUEST, "La requête est invalide");
+        }
 
         $em->persist($user);
         $em->flush();

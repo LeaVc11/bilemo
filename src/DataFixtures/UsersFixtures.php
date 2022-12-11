@@ -14,7 +14,6 @@ use Faker;
 class UsersFixtures extends Fixture
 {
 
-    public const USER_REFERENCE = 'user';
     private UserPasswordHasherInterface $hasher;
 
     public function __construct(UserPasswordHasherInterface $hasher)
@@ -25,7 +24,7 @@ class UsersFixtures extends Fixture
     public function load(ObjectManager $manager)
     {
         $faker = Factory::create('fr_FR');
-        for ($i = 0; $i < 25; $i++) {
+        for ($i = 0; $i < 10; $i++) {
             $user1 = new User();
             $user1->setEmail($faker->email());
             $user1->setCompanyName($faker->company());
@@ -34,7 +33,7 @@ class UsersFixtures extends Fixture
 
             $manager->persist($user1);
         }
-        for ($i = 0; $i < 25; $i++) {
+        for ($i = 0; $i < 10; $i++) {
             $user2 = new User();
             $user2->setEmail($faker->email());
             $user2->setCompanyName($faker->company());

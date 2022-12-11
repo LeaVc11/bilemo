@@ -9,6 +9,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
@@ -34,6 +35,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Assert\NotBlank(message: "Le nom de l'entreprise est obligatoire")]
+    #[Assert\Length(min: 1, max: 255, minMessage: "Le nom de l'entreprise doit faire au moins {{ limit }} caractère",
+        maxMessage: "Le nom de l'entreprise ne peut pas faire plus de {{ limit }} caractères")]
     #[Groups(['getUsers'])]
     private ?string $companyName = null;
 

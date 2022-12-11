@@ -7,6 +7,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: ProductRepository::class)]
 class Product
@@ -19,6 +20,8 @@ class Product
 
     #[ORM\Column(length: 255)]
     #[Assert\NotBlank(message: "Le nom est obligatoire")]
+    #[Assert\Length(min: 1, max: 255, minMessage: "Le nom doit faire au moins {{ limit }} caractère",
+        maxMessage: "Le nom ne peut pas faire plus de {{ limit }} caractères")]
     #[Groups(["getProducts"])]
     private ?string $name = null;
 
