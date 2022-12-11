@@ -38,7 +38,6 @@ class UserController extends AbstractController
             return new JsonResponse($serializer->serialize($errors, 'json'), Response::HTTP_BAD_REQUEST, [], true);
             //throw new HttpException(JsonResponse::HTTP_BAD_REQUEST, "La requête est invalide");
         }
-
         $em->persist($user);
         $em->flush();
 
