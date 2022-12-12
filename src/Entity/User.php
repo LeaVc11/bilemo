@@ -33,7 +33,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private ?string $password = null;
 
-
     #[ORM\Column(length: 255, nullable: true)]
     #[Assert\NotBlank(message: "Le nom de l'entreprise est obligatoire")]
     #[Assert\Length(min: 1, max: 255, minMessage: "Le nom de l'entreprise doit faire au moins {{ limit }} caractère",

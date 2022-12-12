@@ -14,11 +14,11 @@ use Faker;
 class UsersFixtures extends Fixture
 {
 
-    private UserPasswordHasherInterface $hasher;
+    private $userPasswordHasher;
 
-    public function __construct(UserPasswordHasherInterface $hasher)
+    public function __construct(UserPasswordHasherInterface $userPasswordHasher)
     {
-        $this->hasher = $hasher;
+        $this->userPasswordHasher = $userPasswordHasher;
 
     }
     public function load(ObjectManager $manager)
@@ -29,7 +29,7 @@ class UsersFixtures extends Fixture
             $userAdmin->setEmail($faker->email());
             $userAdmin->setCompanyName($faker->company());
             $userAdmin->setRoles(["ROLE_ADMIN"]);
-            $userAdmin->setPassword($this->hasher->hashPassword($userAdmin, "admin"));
+            $userAdmin->setPassword($this->userPasswordHasher->hashPassword($userAdmin, "admin"));
 
             $manager->persist($userAdmin);
         }
@@ -38,7 +38,7 @@ class UsersFixtures extends Fixture
             $user->setEmail($faker->email());
             $user->setCompanyName($faker->company());
             $user->setRoles(["ROLE_USER"]);
-            $user->setPassword($this->hasher->hashPassword($user, "user"));
+            $user->setPassword($this->userPasswordHasher->hashPassword($user, "user"));
 
             $manager->persist($user);
         }
