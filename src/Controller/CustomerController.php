@@ -6,6 +6,7 @@ use App\Entity\Customer;
 use App\Repository\CustomerRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -17,10 +18,9 @@ use Symfony\Component\Serializer\SerializerInterface;
 class CustomerController extends AbstractController
 {
     #[Route('', name: 'customers', methods: ['GET'])]
-    public function getAllCustomers(CustomerRepository $customerRepository, SerializerInterface $serializer): JsonResponse
+    public function getAllCustomers(CustomerRepository $customerRepository): JsonResponse
     {
-//        return $this->json($customerRepository->findAll());
-        return $this->json($customerRepository->findAll(), 200, [], ["groups" => ["getCustomers"]]);
+        return $this->json($customerRepository->findAll(), 200, [], ["groups" => ["getCustomers", "getUsers"]]);
 
     }
     #[Route('', name: 'createCustomer', methods: ['POST'])]

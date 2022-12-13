@@ -18,6 +18,7 @@ class Customer
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(["getCustomers"])]
     #[Assert\NotBlank(message: "Le nom est obligatoire")]
     #[Assert\Length(min: 1, max: 255, minMessage: "Le nom doit faire au moins {{ limit }} caractère",
         maxMessage: "Le nom ne peut pas faire plus de {{ limit }} caractères")]
@@ -25,6 +26,7 @@ class Customer
 
 
     #[ORM\Column(length: 255)]
+    #[Groups(["getCustomers"])]
     private ?string $email = null;
 
     #[ORM\ManyToOne(inversedBy: 'customer')]

@@ -9,7 +9,6 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
@@ -20,7 +19,7 @@ class UserController extends AbstractController
     #[Route('', name: 'users', methods: ['GET'])]
     public function getAllUsers(UserRepository $userRepository, SerializerInterface $serializer): JsonResponse
     {
-        return $this->json($userRepository->findAll(), 200, [], ["groups" => ["getUsers"]]);
+        return $this->json($userRepository->findAll(), 200, [], ["groups" => ["getUsers","getCustomers"]]);
     }
     #[Route('', name: 'createUser', methods: ['POST'])]
     public function createUser(Request $request, SerializerInterface $serializer, EntityManagerInterface $em,
