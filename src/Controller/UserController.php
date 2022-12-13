@@ -20,10 +20,12 @@ class UserController extends AbstractController
     #[Route('', name: 'users', methods: ['GET'])]
     public function getAllUsers(UserRepository $userRepository, SerializerInterface $serializer): JsonResponse
     {
-        $userList = $userRepository->findAll();
-
-        $jsonUserList = $serializer->serialize($userList, 'json', ['groups' => 'getUsers']);
-        return new JsonResponse($jsonUserList, Response::HTTP_OK, [], true);
+//        $userList = $userRepository->findAll();
+//
+//        $jsonUserList = $serializer->serialize($userList, 'json', ['groups' => 'getUsers']);
+//        return new JsonResponse($jsonUserList, Response::HTTP_OK, [], true);
+//        return $this->json($userRepository->findAll(),400);
+        return $this->json($userRepository->findAll());
     }
 
     #[Route('', name: 'createUser', methods: ['POST'])]
@@ -42,12 +44,11 @@ class UserController extends AbstractController
         $em->flush();
 
         $jsonUser = $serializer->serialize($user, 'json', ['groups' => 'getUsers']);
-
-
         return new JsonResponse($jsonUser, Response::HTTP_CREATED, [], true);
+
     }
 
-    #[Route('/edit/{id}', name: 'detailUser', methods: ['GET'])]
+    #[Route('/{id}', name: 'detailUser', methods: ['GET'])]
     public function getDetailUser(User $user, SerializerInterface $serializer): JsonResponse
     {
         $jsonUser = $serializer->serialize($user, 'json', ['groups' => 'getUsers']);

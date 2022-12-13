@@ -39,7 +39,7 @@ class Product
 
     #[ORM\Column]
     #[Groups(["getProducts"])]
-    private ?float $Price = null;
+    private ?float $price = null;
 
     #[ORM\Column(length: 255, nullable: true)]
     #[Groups(["getProducts"])]
@@ -100,12 +100,12 @@ class Product
 
     public function getPrice(): ?float
     {
-        return $this->Price;
+        return $this->price;
     }
 
-    public function setPrice(float $Price): self
+    public function setPrice(float $price): self
     {
-        $this->Price = $Price;
+        $this->price = $price;
 
         return $this;
     }

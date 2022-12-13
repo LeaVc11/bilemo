@@ -18,9 +18,11 @@ class CustomerController extends AbstractController
     #[Route('', name: 'customers', methods: ['GET'])]
     public function getAllCustomers(CustomerRepository $customerRepository, SerializerInterface $serializer): JsonResponse
     {
-        $customerList = $customerRepository->findAll();
-        $jsonCustomerList = $serializer->serialize($customerList, 'json');
-        return new JsonResponse($jsonCustomerList, Response::HTTP_OK, [], true);
+//        $customerList = $customerRepository->findAll();
+//        $jsonCustomerList = $serializer->serialize($customerList, 'json');
+//        return new JsonResponse($jsonCustomerList, Response::HTTP_OK, [], true);
+        return $this->json($customerRepository->findAll());
+
     }
     #[Route('', name: 'createCustomer', methods: ['POST'])]
     public function createCustomer(Request $request, SerializerInterface $serializer, EntityManagerInterface $em): JsonResponse
@@ -33,13 +35,13 @@ class CustomerController extends AbstractController
         $jsonCustomer = $serializer->serialize($customer, 'json', ['groups' => 'getCustomers']);
         return new JsonResponse($jsonCustomer, Response::HTTP_CREATED, [], true);
     }
-    #[Route('/edit/{id}', name: 'detailCustomer' , methods: ['GET'])]
+    #[Route('/{id}', name: 'detailCustomer' , methods: ['GET'])]
     public function getCustomerDetail(Customer $customer, SerializerInterface $serializer): JsonResponse
     {
         $jsonCustomer = $serializer->serialize($customer, 'json');
         return new JsonResponse($jsonCustomer, Response::HTTP_OK, [], true);
     }
-    #[Route('/delete/{id}', name: 'deleteCustomer' , methods: ['DELETE'])]
+    #[Route('/{id}', name: 'deleteCustomer' , methods: ['DELETE'])]
     public function DeleteProduct(Customer $customer, EntityManagerInterface $em): JsonResponse
     {
         $em->remove($customer);
