@@ -17,12 +17,7 @@ class ProductController extends AbstractController
     #[Route('', name: 'products' , methods: ['GET'])]
     public function getAllProducts(ProductRepository $productRepository): JsonResponse
     {
-//        $productList = $productRepository->findAll();
-//
-//        $jsonProductList = $serializer->serialize($productList, 'json', ['groups' => 'getProducts']);
-//        return new JsonResponse($jsonProductList, Response::HTTP_OK, [], true);
-        return $this->json($productRepository->findAll());
-
+        return $this->json($productRepository->findAll(), 200, [], ["groups" => ["getProducts"]]);
     }
     #[Route('/{id}', name: 'detailProduct' , methods: ['GET'])]
     public function getProductDetail(Product $product, SerializerInterface $serializer): JsonResponse

@@ -19,7 +19,8 @@ class CustomerController extends AbstractController
     #[Route('', name: 'customers', methods: ['GET'])]
     public function getAllCustomers(CustomerRepository $customerRepository, SerializerInterface $serializer): JsonResponse
     {
-        return $this->json($customerRepository->findAll());
+//        return $this->json($customerRepository->findAll());
+        return $this->json($customerRepository->findAll(), 200, [], ["groups" => ["getCustomers"]]);
 
     }
     #[Route('', name: 'createCustomer', methods: ['POST'])]
