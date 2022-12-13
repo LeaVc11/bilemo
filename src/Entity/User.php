@@ -45,6 +45,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $companyName = null;
 
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: Customer::class)]
+    #[Groups(['getUsers'])]
     private Collection $customer;
 
     public function __construct()

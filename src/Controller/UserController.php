@@ -20,14 +20,9 @@ class UserController extends AbstractController
     #[Route('', name: 'users', methods: ['GET'])]
     public function getAllUsers(UserRepository $userRepository, SerializerInterface $serializer): JsonResponse
     {
-//        $userList = $userRepository->findAll();
-//
-//        $jsonUserList = $serializer->serialize($userList, 'json', ['groups' => 'getUsers']);
-//        return new JsonResponse($jsonUserList, Response::HTTP_OK, [], true);
-//        return $this->json($userRepository->findAll(),400);
+
         return $this->json($userRepository->findAll());
     }
-
     #[Route('', name: 'createUser', methods: ['POST'])]
     public function createUser(Request $request, SerializerInterface $serializer, EntityManagerInterface $em,
                                UserPasswordHasherInterface $userPasswordHasher, ValidatorInterface $validator): JsonResponse
