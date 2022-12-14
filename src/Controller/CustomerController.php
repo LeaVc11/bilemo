@@ -17,9 +17,12 @@ use Symfony\Component\Serializer\SerializerInterface;
 class CustomerController extends AbstractController
 {
     #[Route('', name: 'customers', methods: ['GET'])]
-    public function getAllCustomers(CustomerRepository $customerRepository): JsonResponse
+    public function getAllCustomers(CustomerRepository $customerRepository, Request $request): JsonResponse
     {
-        return $this->json($customerRepository->findAll(), 200, [], ["groups" => ["getCustomers", "getUsers"]]);
+        $page = $request->get('page', 1);
+        $limit = $request->get('limit', 5);
+
+        return $this->json($customerRepository->findAllWithPagination($page, $limit), 200, [], ["groups" => ["getCustomers", "getUsers"]]);
     }
     #[Route('/', name: 'createCustomer', methods: ['POST'])]
     #[IsGranted('ROLE_ADMIN', message: 'Vous n\'avez pas les droits suffisants pour créer un client')]
