@@ -17,9 +17,12 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 class UserController extends AbstractController
 {
     #[Route('', name: 'users', methods: ['GET'])]
-    public function getAllUsers(UserRepository $userRepository, SerializerInterface $serializer): JsonResponse
+    public function getAllUsers(UserRepository $userRepository, Request $request): JsonResponse
     {
-        return $this->json($userRepository->findAll(), 200, [], ["groups" => ["getUsers","getCustomers"]]);
+        $page = $request->get('page', 1);
+        $limit = $request->get('limit', 5);
+
+        return $this->json($userRepository->findAllWithPagination($page, $limit), 200, [], ["groups" => ["getUsers","getCustomers"]]);
     }
     #[Route('', name: 'createUser', methods: ['POST'])]
     public function createUser(Request $request, SerializerInterface $serializer, EntityManagerInterface $em,

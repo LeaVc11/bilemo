@@ -7,6 +7,7 @@ use App\Repository\ProductRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\SerializerInterface;
@@ -15,9 +16,12 @@ use Symfony\Component\Serializer\SerializerInterface;
 class ProductController extends AbstractController
 {
     #[Route('', name: 'products' , methods: ['GET'])]
-    public function getAllProducts(ProductRepository $productRepository): JsonResponse
+    public function getAllProducts(ProductRepository $productRepository, Request $request): JsonResponse
     {
-        return $this->json($productRepository->findAll(), 200, [], ["groups" => ["getProducts"]]);
+        $page = $request->get('page', 1);
+        $limit = $request->get('limit', 5);
+
+        return $this->json($productRepository->findAllWithPagination($page, $limit), 200, [], ["groups" => ["getProducts"]]);
     }
     #[Route('/{id}', name: 'detailProduct' , methods: ['GET'])]
     public function getProductDetail(Product $product, SerializerInterface $serializer): JsonResponse
