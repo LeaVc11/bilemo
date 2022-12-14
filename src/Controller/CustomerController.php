@@ -20,17 +20,17 @@ class CustomerController extends AbstractController
     public function getAllCustomers(CustomerRepository $customerRepository): JsonResponse
     {
         return $this->json($customerRepository->findAll(), 200, [], ["groups" => ["getCustomers", "getUsers"]]);
-
     }
-    #[Route('', name: 'createCustomer', methods: ['POST'])]
+    #[Route('/', name: 'createCustomer', methods: ['POST'])]
     #[IsGranted('ROLE_ADMIN', message: 'Vous n\'avez pas les droits suffisants pour créer un client')]
-    public function createCustomer(Request $request, SerializerInterface $serializer, EntityManagerInterface $em): JsonResponse
+
+    public function createCustomer(Request $request, SerializerInterface $serializer,
+                                   EntityManagerInterface $em): JsonResponse
     {
         $customer = $serializer->deserialize($request->getContent(), Customer::class, 'json');
 
         $em->persist($customer);
         $em->flush();
-
         $jsonCustomer = $serializer->serialize($customer, 'json', ['groups' => 'getCustomers']);
         return new JsonResponse($jsonCustomer, Response::HTTP_CREATED, [], true);
     }
@@ -41,6 +41,7 @@ class CustomerController extends AbstractController
         return new JsonResponse($jsonCustomer, Response::HTTP_OK, [], true);
     }
     #[Route('/{id}', name: 'deleteCustomer' , methods: ['DELETE'])]
+    #[IsGranted('ROLE_ADMIN', message: 'Vous n\'avez pas les droits suffisants pour supprimer un auteur')]
     public function DeleteProduct(Customer $customer, EntityManagerInterface $em): JsonResponse
     {
         $em->remove($customer);
