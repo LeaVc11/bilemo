@@ -12,18 +12,28 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Contracts\Cache\ItemInterface;
+use Symfony\Contracts\Cache\TagAwareCacheInterface;
 
 #[Route('/api/customers', name: 'customer_')]
 class CustomerController extends AbstractController
 {
     #[Route('', name: 'customers', methods: ['GET'])]
-    public function getAllCustomers(CustomerRepository $customerRepository, Request $request): JsonResponse
+    public function getAllCustomers(CustomerRepository $customerRepository,SerializerInterface $serializer, Request $request, TagAwareCacheInterface $cache): JsonResponse
     {
         $page = $request->get('page', 1);
         $limit = $request->get('limit', 5);
 
+        $idCache = "getAllCustomers-" . $page . "-" . $limit;
+
+        $jsonCustomerList = $cache->get($idCache,
+            function (ItemInterface $item) use ($customerRepository, $page, $limit, $serializer) {
+                //echo ("L'ELEMENT N'EST PAS ENCORE EN CACHE !\n");
+                $item->tag("customersCache");
+            });
         return $this->json($customerRepository->findAllWithPagination($page, $limit), 200, [], ["groups" => ["getCustomers", "getUsers"]]);
-    }
+
+        }
     #[Route('/', name: 'createCustomer', methods: ['POST'])]
     #[IsGranted('ROLE_ADMIN', message: 'Vous n\'avez pas les droits suffisants pour créer un client')]
 
