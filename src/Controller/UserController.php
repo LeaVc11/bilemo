@@ -20,19 +20,24 @@ use Symfony\Contracts\Cache\TagAwareCacheInterface;
 class UserController extends AbstractController
 {
     #[Route('', name: 'users', methods: ['GET'])]
-    public function getAllUsers(UserRepository $userRepository, Request $request,SerializerInterface $serializer , TagAwareCacheInterface $cache): JsonResponse
+    public function getAllUsers(
+        UserRepository $userRepository,
+        SerializerInterface $serializer,
+        Request $request,
+        TagAwareCacheInterface $cache
+    ): JsonResponse
     {
         $page = $request->get('page', 1);
         $limit = $request->get('limit', 5);
 
-        $idCache = "getAllCustomers-" . $page . "-" . $limit;
-        $userList = $cache->get($idCache, function (ItemInterface $item) use ($userRepository, $page, $limit, $serializer){
-            echo ("L'ELEMENT N'EST PAS ENCORE EN CACHE !\n");
-            $item->tag("userCache");
-        return $userRepository->findAllWithPagination($page, $limit);
-    });
-        return $this->json($userList, 200, [], ["groups" => ["getCustomers", "getUsers"]]);
+        $idCache = "getAllUsers-" . $page . "-" . $limit;
+        $userList = $cache->get($idCache, function(ItemInterface $item) use ($userRepository, $page, $limit){
+            echo ("user");
+            $item->tag("usersCache");
+            return $userRepository->findAllWithPagination($page, $limit);
+        });
 
+        return $this->json($userList, 200, [], ["groups" => ["getUsers", "getCustomers"]]);
     }
     #[Route('', name: 'createUser', methods: ['POST'])]
     public function createUser(Request $request, SerializerInterface $serializer, EntityManagerInterface $em,

@@ -23,20 +23,23 @@ class CustomerController extends AbstractController
      * @throws InvalidArgumentException
      */
     #[Route('', name: 'customers', methods: ['GET'])]
-    public function getAllCustomers(CustomerRepository $customerRepository,SerializerInterface $serializer, Request $request, TagAwareCacheInterface $cache): JsonResponse
+    public function getAllCustomers(
+        CustomerRepository $customerRepository,
+        Request $request,
+        TagAwareCacheInterface $cache
+    ): JsonResponse
     {
         $page = $request->get('page', 1);
-        $limit = $request->get('limit', 5);
+        $limit = $request->get('limit', 10);
 
         $idCache = "getAllCustomers-" . $page . "-" . $limit;
-        $customerList = $cache->get($idCache, function (ItemInterface $item) use ($customerRepository, $page, $limit, $serializer){
-            echo ("L'ELEMENT N'EST PAS ENCORE EN CACHE !\n");
+        $customerList = $cache->get($idCache, function(ItemInterface $item) use ($customerRepository, $page, $limit){
+            echo ("customer");
             $item->tag("customersCache");
             return $customerRepository->findAllWithPagination($page, $limit);
         });
 
         return $this->json($customerList, 200, [], ["groups" => ["getCustomers", "getUsers"]]);
-
     }
     #[Route('/', name: 'createCustomer', methods: ['POST'])]
     #[IsGranted('ROLE_ADMIN', message: 'Vous n\'avez pas les droits suffisants pour créer un client')]

@@ -30,6 +30,7 @@ class Customer
     private ?string $email = null;
 
     #[ORM\ManyToOne(inversedBy: 'customer')]
+    #[Groups(["getCustomers"])]
     private ?User $user = null;
 
     public function __construct()
