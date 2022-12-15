@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Customer;
 use App\Repository\CustomerRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Psr\Cache\InvalidArgumentException;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -18,6 +19,9 @@ use Symfony\Contracts\Cache\TagAwareCacheInterface;
 #[Route('/api/customers', name: 'customer_')]
 class CustomerController extends AbstractController
 {
+    /**
+     * @throws InvalidArgumentException
+     */
     #[Route('', name: 'customers', methods: ['GET'])]
     public function getAllCustomers(CustomerRepository $customerRepository,SerializerInterface $serializer, Request $request, TagAwareCacheInterface $cache): JsonResponse
     {
@@ -25,15 +29,15 @@ class CustomerController extends AbstractController
         $limit = $request->get('limit', 5);
 
         $idCache = "getAllCustomers-" . $page . "-" . $limit;
+        $customerList = $cache->get($idCache, function (ItemInterface $item) use ($customerRepository, $page, $limit, $serializer){
+            echo ("L'ELEMENT N'EST PAS ENCORE EN CACHE !\n");
+            $item->tag("customersCache");
+            return $customerRepository->findAllWithPagination($page, $limit);
+        });
 
-        $jsonCustomerList = $cache->get($idCache,
-            function (ItemInterface $item) use ($customerRepository, $page, $limit, $serializer) {
-                //echo ("L'ELEMENT N'EST PAS ENCORE EN CACHE !\n");
-                $item->tag("customersCache");
-            });
-        return $this->json($customerRepository->findAllWithPagination($page, $limit), 200, [], ["groups" => ["getCustomers", "getUsers"]]);
+        return $this->json($customerList, 200, [], ["groups" => ["getCustomers", "getUsers"]]);
 
-        }
+    }
     #[Route('/', name: 'createCustomer', methods: ['POST'])]
     #[IsGranted('ROLE_ADMIN', message: 'Vous n\'avez pas les droits suffisants pour créer un client')]
 
@@ -54,7 +58,7 @@ class CustomerController extends AbstractController
         return new JsonResponse($jsonCustomer, Response::HTTP_OK, [], true);
     }
     #[Route('/{id}', name: 'deleteCustomer' , methods: ['DELETE'])]
-    #[IsGranted('ROLE_ADMIN', message: 'Vous n\'avez pas les droits suffisants pour supprimer un auteur')]
+    #[IsGranted('ROLE_ADMIN', message: 'Vous n\'avez pas les droits suffisants pour supprimer un client')]
     public function DeleteProduct(Customer $customer, EntityManagerInterface $em): JsonResponse
     {
         $em->remove($customer);

@@ -6,23 +6,33 @@ use App\Entity\User;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Contracts\Cache\ItemInterface;
+use Symfony\Contracts\Cache\TagAwareCacheInterface;
 
 #[Route('/api/users', name: 'user_')]
 class UserController extends AbstractController
 {
     #[Route('', name: 'users', methods: ['GET'])]
-    public function getAllUsers(UserRepository $userRepository, Request $request): JsonResponse
+    public function getAllUsers(UserRepository $userRepository, Request $request,SerializerInterface $serializer , TagAwareCacheInterface $cache): JsonResponse
     {
         $page = $request->get('page', 1);
         $limit = $request->get('limit', 5);
 
-        return $this->json($userRepository->findAllWithPagination($page, $limit), 200, [], ["groups" => ["getUsers","getCustomers"]]);
+        $idCache = "getAllCustomers-" . $page . "-" . $limit;
+        $userList = $cache->get($idCache, function (ItemInterface $item) use ($userRepository, $page, $limit, $serializer){
+            echo ("L'ELEMENT N'EST PAS ENCORE EN CACHE !\n");
+            $item->tag("userCache");
+        return $userRepository->findAllWithPagination($page, $limit);
+    });
+        return $this->json($userList, 200, [], ["groups" => ["getCustomers", "getUsers"]]);
+
     }
     #[Route('', name: 'createUser', methods: ['POST'])]
     public function createUser(Request $request, SerializerInterface $serializer, EntityManagerInterface $em,
@@ -49,5 +59,13 @@ class UserController extends AbstractController
     {
         $jsonUser = $serializer->serialize($user, 'json', ['groups' => 'getUsers']);
         return new JsonResponse($jsonUser, Response::HTTP_OK, [], true);
+    }
+    #[Route('/{id}', name: 'deleteUser' , methods: ['DELETE'])]
+    #[IsGranted('ROLE_ADMIN', message: 'Vous n\'avez pas les droits suffisants pour supprimer un user')]
+    public function DeleteProduct(User $user, EntityManagerInterface $em): JsonResponse
+    {
+        $em->remove($user);
+        $em->flush();
+        return new JsonResponse(null, Response::HTTP_NO_CONTENT);
     }
 }
