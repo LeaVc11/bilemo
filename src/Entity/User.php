@@ -17,11 +17,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['getUsers'])]
+    #[Groups(['getUsers', 'getCustomers'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 180, unique: true)]
-    #[Groups(['getUsers'])]
+    #[Groups(['getUsers', 'getCustomers'])]
     private ?string $email = null;
 
     #[ORM\Column]
@@ -34,20 +34,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Assert\NotBlank(message: "Le password est obligatoire")]
     #[Assert\Length(min: 2, max: 255, minMessage: "Le password  doit faire au moins {{ limit }} caractère",
         maxMessage: "Le password  ne peut pas faire plus de {{ limit }} caractères")]
-    #[Groups(["getUsers"])]
     private ?string $password = null;
 
     #[ORM\Column(length: 255, nullable: true)]
     #[Assert\NotBlank(message: "Le nom de l'entreprise est obligatoire")]
     #[Assert\Length(min: 1, max: 255, minMessage: "Le nom de l'entreprise doit faire au moins {{ limit }} caractère",
         maxMessage: "Le nom de l'entreprise ne peut pas faire plus de {{ limit }} caractères")]
-    #[Groups(['getUsers'])]
+    #[Groups(['getUsers', 'getCustomers'])]
     private ?string $companyName = null;
 
-    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Customer::class)]
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Customer::class, cascade: ['persist'], orphanRemoval: true)]
     #[Groups(['getUsers'])]
     private Collection $customer;
-
     public function __construct()
     {
         $this->customer = new ArrayCollection();

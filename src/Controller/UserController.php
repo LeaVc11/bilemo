@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\User;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Psr\Cache\InvalidArgumentException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -22,7 +23,6 @@ class UserController extends AbstractController
     #[Route('', name: 'users', methods: ['GET'])]
     public function getAllUsers(
         UserRepository $userRepository,
-        SerializerInterface $serializer,
         Request $request,
         TagAwareCacheInterface $cache
     ): JsonResponse
@@ -31,13 +31,13 @@ class UserController extends AbstractController
         $limit = $request->get('limit', 5);
 
         $idCache = "getAllUsers-" . $page . "-" . $limit;
-        $userList = $cache->get($idCache, function(ItemInterface $item) use ($userRepository, $page, $limit){
-            echo ("user");
+        $userList = $cache->get($idCache, function (ItemInterface $item) use ($userRepository, $page, $limit) {
+            echo("user !\n");
             $item->tag("usersCache");
             return $userRepository->findAllWithPagination($page, $limit);
         });
 
-        return $this->json($userList, 200, [], ["groups" => ["getUsers", "getCustomers"]]);
+        return $this->json($userList, 200, [], ["groups" => ["getUsers"]]);
     }
     #[Route('', name: 'createUser', methods: ['POST'])]
     public function createUser(Request $request, SerializerInterface $serializer, EntityManagerInterface $em,
@@ -65,10 +65,16 @@ class UserController extends AbstractController
         $jsonUser = $serializer->serialize($user, 'json', ['groups' => 'getUsers']);
         return new JsonResponse($jsonUser, Response::HTTP_OK, [], true);
     }
+
+    /**
+     * @throws InvalidArgumentException
+     */
     #[Route('/{id}', name: 'deleteUser' , methods: ['DELETE'])]
     #[IsGranted('ROLE_ADMIN', message: 'Vous n\'avez pas les droits suffisants pour supprimer un user')]
-    public function DeleteProduct(User $user, EntityManagerInterface $em): JsonResponse
+    public function DeleteUser(User $user, EntityManagerInterface $em, TagAwareCacheInterface $cache): JsonResponse
     {
+        // On vide le cache.
+        $cache->invalidateTags(["CustomersCache","UsersCache" ]);
         $em->remove($user);
         $em->flush();
         return new JsonResponse(null, Response::HTTP_NO_CONTENT);

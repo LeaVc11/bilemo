@@ -21,7 +21,7 @@ class CustomersFixtures extends Fixture implements DependentFixtureInterface
     {
         $faker = Factory::create('fr_FR');
         foreach($this->UserRepository->findAll() as $user) {
-            for ($i = 0; $i < 20; $i++) {
+            for ($i = 0; $i < 10; $i++) {
                 $customer = (new Customer())
                     ->setName($faker->name())
                     ->setEmail($faker->email())
