@@ -5,6 +5,8 @@ namespace App\Controller;
 use App\Entity\User;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use JMS\Serializer\SerializationContext;
+use JMS\Serializer\SerializerInterface;
 use Psr\Cache\InvalidArgumentException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
@@ -12,7 +14,6 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Contracts\Cache\ItemInterface;
 use Symfony\Contracts\Cache\TagAwareCacheInterface;
@@ -23,6 +24,7 @@ class UserController extends AbstractController
     #[Route('', name: 'users', methods: ['GET'])]
     public function getAllUsers(
         UserRepository $userRepository,
+        SerializerInterface $serializer,
         Request $request,
         TagAwareCacheInterface $cache
     ): JsonResponse
@@ -31,13 +33,15 @@ class UserController extends AbstractController
         $limit = $request->get('limit', 5);
 
         $idCache = "getAllUsers-" . $page . "-" . $limit;
-        $userList = $cache->get($idCache, function (ItemInterface $item) use ($userRepository, $page, $limit) {
-            echo("user !\n");
+        $userList = $cache->get($idCache, function (ItemInterface $item) use ($userRepository, $page, $limit, $serializer) {
+            echo("user");
             $item->tag("usersCache");
-            return $userRepository->findAllWithPagination($page, $limit);
+            $userList = $userRepository->findAllWithPagination($page, $limit);
+            $context = SerializationContext::create()->setGroups(["getUsers"]);
+            return $serializer->serialize($userList, 'json', $context);
         });
 
-        return $this->json($userList, 200, [], ["groups" => ["getUsers"]]);
+        return new JsonResponse($userList, Response::HTTP_OK, [], true);
     }
     #[Route('', name: 'createUser', methods: ['POST'])]
     public function createUser(Request $request, SerializerInterface $serializer, EntityManagerInterface $em,
