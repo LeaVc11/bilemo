@@ -117,9 +117,10 @@ class CustomerController extends AbstractController
                                    UserRepository         $userRepository, ValidatorInterface $validator,
                                    TagAwareCacheInterface $cache): JsonResponse
     {
-        $newBook = $serializer->deserialize($request->getContent(), Customer::class, 'json');
-        $currentCustomer->setName($newBook->getName());
-        $currentCustomer->setEmail($newBook->getEmail());
+        $newCustomer = $serializer->deserialize($request->getContent(), Customer::class, 'json');
+
+        $currentCustomer->setName($newCustomer->getName());
+        $currentCustomer->setEmail($newCustomer->getEmail());
 
         // On vérifie les erreurs
         $errors = $validator->validate($currentCustomer);
