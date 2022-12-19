@@ -42,12 +42,74 @@ class CustomerController extends AbstractController
 
         return $this->json($customerList, 200, [], ["groups" => ["getCustomers"]]);
     }
-//Cette méthode permet d'insérer un nouveau client.
+
+//Cette méthode permet de récupérer un customer en particulier en fonction de son id.
+
+    #[Route('/{id}', name: 'detailCustomer', methods: ['GET'])]
+    public function getCustomerDetail(Customer $customer, SerializerInterface $serializer): JsonResponse
+    {
+        $context = SerializationContext::create()->setGroups(['getCustomers']);
+        $jsonCustomer = $serializer->serialize($customer, 'json', $context);
+        return new JsonResponse($jsonCustomer, Response::HTTP_OK, [], true);
+    }
+
+//Cette méthode permet de supprimer un livre par rapport à son id.
 
     /**
      * @throws InvalidArgumentException
      */
-    #[Route('/', name: 'createCustomer', methods: ['POST'])]
+    #[Route('/{id}', name: 'deleteCustomer', methods: ['DELETE'])]
+    #[IsGranted('ROLE_ADMIN', message: 'Vous n\'avez pas les droits suffisants pour supprimer un customer')]
+    public function DeleteProduct(Customer $customer, EntityManagerInterface $em, TagAwareCacheInterface $cache): JsonResponse
+    {
+        $em->remove($customer);
+        $em->flush();
+        // On vide le cache.
+        $cache->invalidateTags(["customersCache"]);
+        return new JsonResponse(null, Response::HTTP_NO_CONTENT);
+    }
+//Cette méthode permet de mettre à jour un client en fonction de son id.
+
+    /**
+     * @throws InvalidArgumentException
+     */
+    #[Route('/edit/{id}', name: "updateCustomer", methods: ['PUT'])]
+    #[IsGranted('ROLE_ADMIN', message: 'Vous n\'avez pas les droits suffisants pour éditer un client')]
+    public function updateCustomer(Request                $request, SerializerInterface $serializer,
+                                   Customer               $currentCustomer, EntityManagerInterface $em,
+                                   UserRepository         $userRepository, ValidatorInterface $validator,
+                                   TagAwareCacheInterface $cache): JsonResponse
+    {
+        $newCustomer = $serializer->deserialize($request->getContent(), Customer::class, 'json');
+
+        $currentCustomer->setName($newCustomer->getName());
+        $currentCustomer->setEmail($newCustomer->getEmail());
+
+        // On vérifie les erreurs
+        $errors = $validator->validate($currentCustomer);
+        if ($errors->count() > 0) {
+            return new JsonResponse($serializer->serialize($errors, 'json'), Response::HTTP_BAD_REQUEST, [], true);
+        }
+
+        $content = $request->toArray();
+        $idUser = $content['idUser'] ?? -1;
+
+        $currentCustomer->setUser($userRepository->find($idUser));
+
+        $em->persist($currentCustomer);
+        $em->flush();
+
+        // On vide le cache.
+        $cache->invalidateTags(["customersCache"]);
+
+        return new JsonResponse(null, Response::HTTP_NO_CONTENT);
+    }
+    //Cette méthode permet d'insérer un nouveau client.
+
+    /**
+     * @throws InvalidArgumentException
+     */
+    #[Route('/new', name: 'createCustomer', methods: ['POST'])]
     #[IsGranted('ROLE_ADMIN', message: 'Vous n\'avez pas les droits suffisants pour créer un client')]
     public function createCustomer(Request                $request, SerializerInterface $serializer,
                                    UrlGeneratorInterface  $urlGenerator, TagAwareCacheInterface $cache,
@@ -80,66 +142,5 @@ class CustomerController extends AbstractController
         return new JsonResponse($jsonCustomer, Response::HTTP_CREATED, ["Location" => $location], true);
     }
 
-//Cette méthode permet de récupérer un livre en particulier en fonction de son id.
-
-    #[Route('/{id}', name: 'detailCustomer', methods: ['GET'])]
-    public function getCustomerDetail(Customer $customer, SerializerInterface $serializer): JsonResponse
-    {
-        $context = SerializationContext::create()->setGroups(['getCustomers']);
-        $jsonCustomer = $serializer->serialize($customer, 'json', $context);
-        return new JsonResponse($jsonCustomer, Response::HTTP_OK, [], true);
-    }
-
-//Cette méthode permet de supprimer un livre par rapport à son id.
-
-    /**
-     * @throws InvalidArgumentException
-     */
-    #[Route('/{id}', name: 'deleteCustomer', methods: ['DELETE'])]
-    #[IsGranted('ROLE_ADMIN', message: 'Vous n\'avez pas les droits suffisants pour supprimer un customer')]
-    public function DeleteProduct(Customer $customer, EntityManagerInterface $em, TagAwareCacheInterface $cache): JsonResponse
-    {
-        $em->remove($customer);
-        $em->flush();
-        // On vide le cache.
-        $cache->invalidateTags(["customersCache"]);
-        return new JsonResponse(null, Response::HTTP_NO_CONTENT);
-    }
-//Cette méthode permet de mettre à jour un client en fonction de son id.
-
-    /**
-     * @throws InvalidArgumentException
-     */
-    #[Route('/{id}', name: "updateCustomer", methods: ['PUT'])]
-    #[IsGranted('ROLE_ADMIN', message: 'Vous n\'avez pas les droits suffisants pour éditer un client')]
-    public function updateCustomer(Request                $request, SerializerInterface $serializer,
-                                   Customer               $currentCustomer, EntityManagerInterface $em,
-                                   UserRepository         $userRepository, ValidatorInterface $validator,
-                                   TagAwareCacheInterface $cache): JsonResponse
-    {
-        $newCustomer = $serializer->deserialize($request->getContent(), Customer::class, 'json');
-
-        $currentCustomer->setName($newCustomer->getName());
-        $currentCustomer->setEmail($newCustomer->getEmail());
-
-        // On vérifie les erreurs
-        $errors = $validator->validate($currentCustomer);
-        if ($errors->count() > 0) {
-            return new JsonResponse($serializer->serialize($errors, 'json'), Response::HTTP_BAD_REQUEST, [], true);
-        }
-
-        $content = $request->toArray();
-        $idUser = $content['idUser'] ?? -1;
-
-        $currentCustomer->setUser($userRepository->find($idUser));
-
-        $em->persist($currentCustomer);
-        $em->flush();
-
-        // On vide le cache.
-        $cache->invalidateTags(["customersCache"]);
-
-        return new JsonResponse(null, Response::HTTP_NO_CONTENT);
-    }
 
 }
