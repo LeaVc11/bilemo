@@ -26,6 +26,7 @@ class CustomerController extends AbstractController
 //Cette méthode permet de récupérer l'ensemble des clients.
     #[Route('', name: 'customers', methods: ['GET'])]
     public function getAllCustomers(CustomerRepository     $customerRepository,
+                                    SerializerInterface $serializer,
                                     Request                $request,
                                     TagAwareCacheInterface $cache
     ): JsonResponse
@@ -34,13 +35,16 @@ class CustomerController extends AbstractController
         $limit = $request->get('limit', 10);
 
         $idCache = "getAllCustomers-" . $page . "-" . $limit;
-        $customerList = $cache->get($idCache, function (ItemInterface $item) use ($customerRepository, $page, $limit) {
+        $customerList = $cache->get($idCache, function (ItemInterface $item) use ($customerRepository, $page, $limit, $serializer) {
             echo("customer");
             $item->tag("customersCache");
-            return $customerRepository->findAllWithPagination($page, $limit);
+            $customers = $customerRepository->findAllWithPagination($page, $limit);
+            $context = SerializationContext::create()->setGroups(['getCustomers']);
+
+            return $serializer->serialize($customers, 'json', $context);
         });
 
-        return $this->json($customerList, 200, [], ["groups" => ["getCustomers"]]);
+        return new JsonResponse($customerList, Response::HTTP_OK, [], true);
     }
 
 //Cette méthode permet de récupérer un customer en particulier en fonction de son id.
@@ -53,7 +57,7 @@ class CustomerController extends AbstractController
         return new JsonResponse($jsonCustomer, Response::HTTP_OK, [], true);
     }
 
-//Cette méthode permet de supprimer un livre par rapport à son id.
+//Cette méthode permet de supprimer un client par rapport à son id.
 
     /**
      * @throws InvalidArgumentException
