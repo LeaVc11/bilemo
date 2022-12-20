@@ -9,6 +9,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use JMS\Serializer\SerializationContext;
 use JMS\Serializer\SerializerInterface;
 use Psr\Cache\InvalidArgumentException;
+use Psr\Log\LoggerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -23,6 +24,7 @@ use Symfony\Contracts\Cache\TagAwareCacheInterface;
 #[Route('/api/customers', name: 'customer_')]
 class CustomerController extends AbstractController
 {
+
 //Cette méthode permet de récupérer l'ensemble des clients.
     #[Route('', name: 'customers', methods: ['GET'])]
     public function getAllCustomers(CustomerRepository     $customerRepository,
