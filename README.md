@@ -1,19 +1,39 @@
 # P7_bilemo
 
+# Description
+BileMo API is webservice exposing an API.
+
+This project aims to developp a REST API to provide mobile phones for clients catalog. 
+This first version was developped according to the first client needs:
+
+Consult BileMo products
+Consult product details
+Consult customers list related to the client
+Consult customer details related to the client
+Add a new customer related to a client
+Delete a customer related to a client
+API access is restricted to referenced and authenticated clients.
+
 # Prerequisites
 
 PHP 8.1
 Symfony CLI
 
+
+# Installation and configuration
+1 - Git clone the project
+
+https://github.com/LeaVc11/P7_bilemo
+
 # Install dependencies
 
-Before running the project, you need to run the following commands in order to install the appropriate dependencies.
+Before running the project, you need to run the following commands in order to install the appropriate
+dependencies.
 
 composer install
 
-# Installation and configuration
- Clone or download the repository
 Duplicate and rename the .env file to .env.local and modify the necessary information (APP_ENV, APP_SECRET, ...)
+
 # Create a database
 Now let's create our database. This will use the DATABASE_URL you've provided in .env.local file.
 
