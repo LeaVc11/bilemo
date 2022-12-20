@@ -11,6 +11,9 @@ Before running the project, you need to run the following commands in order to i
 
 composer install
 
+# Installation and configuration
+ Clone or download the repository
+Duplicate and rename the .env file to .env.local and modify the necessary information (APP_ENV, APP_SECRET, ...)
 # Create a database
 Now let's create our database. This will use the DATABASE_URL you've provided in .env.local file.
 
