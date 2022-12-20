@@ -33,17 +33,14 @@ class CustomerController extends AbstractController
     {
         $page = $request->get('page', 1);
         $limit = $request->get('limit', 10);
-
         $idCache = "getAllCustomers-" . $page . "-" . $limit;
         $customerList = $cache->get($idCache, function (ItemInterface $item) use ($customerRepository, $page, $limit, $serializer) {
             echo("customer");
             $item->tag("customersCache");
             $customers = $customerRepository->findAllWithPagination($page, $limit);
             $context = SerializationContext::create()->setGroups(['getCustomers']);
-
             return $serializer->serialize($customers, 'json', $context);
         });
-
         return new JsonResponse($customerList, Response::HTTP_OK, [], true);
     }
 
@@ -77,7 +74,7 @@ class CustomerController extends AbstractController
     /**
      * @throws InvalidArgumentException
      */
-    #[Route('/edit/{id}', name: "updateCustomer", methods: ['PUT'])]
+    #[Route('/{id}', name: "updateCustomer", methods: ['PUT'])]
     #[IsGranted('ROLE_ADMIN', message: 'Vous n\'avez pas les droits suffisants pour éditer un client')]
     public function updateCustomer(Request                $request, SerializerInterface $serializer,
                                    Customer               $currentCustomer, EntityManagerInterface $em,
@@ -85,35 +82,27 @@ class CustomerController extends AbstractController
                                    TagAwareCacheInterface $cache): JsonResponse
     {
         $newCustomer = $serializer->deserialize($request->getContent(), Customer::class, 'json');
-
         $currentCustomer->setName($newCustomer->getName());
         $currentCustomer->setEmail($newCustomer->getEmail());
-
         // On vérifie les erreurs
         $errors = $validator->validate($currentCustomer);
         if ($errors->count() > 0) {
             return new JsonResponse($serializer->serialize($errors, 'json'), Response::HTTP_BAD_REQUEST, [], true);
         }
-
         $content = $request->toArray();
         $idUser = $content['idUser'] ?? -1;
-
         $currentCustomer->setUser($userRepository->find($idUser));
-
         $em->persist($currentCustomer);
         $em->flush();
-
         // On vide le cache.
         $cache->invalidateTags(["customersCache"]);
-
         return new JsonResponse(null, Response::HTTP_NO_CONTENT);
     }
     //Cette méthode permet d'insérer un nouveau client.
-
     /**
      * @throws InvalidArgumentException
      */
-    #[Route('/new', name: 'createCustomer', methods: ['POST'])]
+    #[Route('/', name: 'createCustomer', methods: ['POST'])]
     #[IsGranted('ROLE_ADMIN', message: 'Vous n\'avez pas les droits suffisants pour créer un client')]
     public function createCustomer(Request                $request, SerializerInterface $serializer,
                                    UrlGeneratorInterface  $urlGenerator, TagAwareCacheInterface $cache,
@@ -127,24 +116,17 @@ class CustomerController extends AbstractController
             return new JsonResponse($serializer->serialize($errors, 'json'), Response::HTTP_BAD_REQUEST, [], true);
             //throw new HttpException(JsonResponse::HTTP_BAD_REQUEST, "La requête est invalide");
         }
-
         $content = $request->toArray();
         $idUser = $content['idUser'] ?? -1;
         $customer->setUSer($userRepository->find($idUser));
         $em->persist($customer);
         $em->flush();
-
         // On vide le cache.
         $cache->invalidateTags(["customersCache"]);
-
         $context = SerializationContext::create()->setGroups(["getCustomers"]);
         $jsonCustomer = $serializer->serialize($customer, 'json', $context);
-
         $location = $urlGenerator->generate('customer_detailCustomer', ['id' => $customer->getId()],
             UrlGeneratorInterface::ABSOLUTE_URL);
-
         return new JsonResponse($jsonCustomer, Response::HTTP_CREATED, ["Location" => $location], true);
     }
-
-
 }
