@@ -9,7 +9,6 @@ use Doctrine\ORM\EntityManagerInterface;
 use JMS\Serializer\SerializationContext;
 use JMS\Serializer\SerializerInterface;
 use Psr\Cache\InvalidArgumentException;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -44,6 +43,10 @@ class UserController extends AbstractController
 
         return new JsonResponse($userList, Response::HTTP_OK, [], true);
     }
+
+    /**
+     * @throws InvalidArgumentException
+     */
     #[Route('', name: 'createUser', methods: ['POST'])]
     public function createUser(Request $request,
                                UrlGeneratorInterface  $urlGenerator,

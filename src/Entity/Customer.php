@@ -25,7 +25,7 @@ use Hateoas\Configuration\Annotation as Hateoas;
  *          "customer_deleteCustomer",
  *          parameters = { "id" = "expr(object.getId())" },
  *      ),
- *      exclusion = @Hateoas\Exclusion(groups="getCustomer", excludeIf = "expr(not is_granted('ROLE_ADMIN'))"),
+ *      exclusion = @Hateoas\Exclusion(groups="getCustomers", excludeIf = "expr(not is_granted('ROLE_ADMIN'))"),
  * )
  *
  * * @Hateoas\Relation(
@@ -34,7 +34,7 @@ use Hateoas\Configuration\Annotation as Hateoas;
  *          "customer_updateCustomer",
  *          parameters = { "id" = "expr(object.getId())" },
  *      ),
- *      exclusion = @Hateoas\Exclusion(groups="getCustomer", excludeIf = "expr(not is_granted('ROLE_ADMIN'))"),
+ *      exclusion = @Hateoas\Exclusion(groups="getCustomers", excludeIf = "expr(not is_granted('ROLE_ADMIN'))"),
  * )
  */
 #[ORM\Entity(repositoryClass: CustomerRepository::class)]
@@ -59,7 +59,7 @@ class Customer
     private ?string $email = null;
 
     #[ORM\ManyToOne(inversedBy: 'customer')]
-    #[Groups(["getCustomers"])]
+    #[Groups(["getCustomer"])]
     private ?User $user = null;
 
     public function __construct()
