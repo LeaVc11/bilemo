@@ -34,11 +34,12 @@ class CustomerController extends AbstractController
         $page = $request->get('page', 1);
         $limit = $request->get('limit', 10);
 
-        $idCache = "getAllCustomers-" . $page . "-" . $limit;
-        $customerList = $cache->get($idCache, function (ItemInterface $item) use ($customerRepository, $page, $limit, $serializer) {
+
+        $idCache = "getAllCustomers-" . $page . "-" . $limit ;
+        $customerList = $cache->get($idCache, function (ItemInterface $item) use ($customerRepository, $page, $limit,$value, $serializer) {
       /*      echo("customer");*/
             $item->tag("customersCache");
-            $customers = $customerRepository->findAllWithPagination($page, $limit);
+            $customers = $customerRepository->findAllWithPagination($page, $limit, $this->getUser());
             $context = SerializationContext::create()->setGroups(['getCustomers']);
             return $serializer->serialize($customers, 'json', $context);
         });
