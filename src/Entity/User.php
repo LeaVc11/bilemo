@@ -10,8 +10,6 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use JMS\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
-use Hateoas\Configuration\Annotation as Hateoas;
-
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
@@ -19,7 +17,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(["getUsers", "getCustomers"])]
+    #[Groups(['getUsers'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 180, unique: true)]
@@ -47,7 +45,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $companyName = null;
 
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: Customer::class)]
-    #[Groups(["getUsers"])]
+    #[Groups(['getUsers'])]
     private Collection $customer;
 
     public function __construct()
