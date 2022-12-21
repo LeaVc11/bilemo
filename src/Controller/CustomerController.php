@@ -33,9 +33,10 @@ class CustomerController extends AbstractController
     {
         $page = $request->get('page', 1);
         $limit = $request->get('limit', 10);
+
         $idCache = "getAllCustomers-" . $page . "-" . $limit;
         $customerList = $cache->get($idCache, function (ItemInterface $item) use ($customerRepository, $page, $limit, $serializer) {
-            echo("customer");
+      /*      echo("customer");*/
             $item->tag("customersCache");
             $customers = $customerRepository->findAllWithPagination($page, $limit);
             $context = SerializationContext::create()->setGroups(['getCustomers']);
@@ -49,6 +50,7 @@ class CustomerController extends AbstractController
     #[Route('/{id}', name: 'detailCustomer', methods: ['GET'])]
     public function getCustomerDetail(Customer $customer, SerializerInterface $serializer): JsonResponse
     {
+
         $context = SerializationContext::create()->setGroups(['getCustomers']);
         $jsonCustomer = $serializer->serialize($customer, 'json', $context);
         return new JsonResponse($jsonCustomer, Response::HTTP_OK, [], true);
@@ -61,7 +63,7 @@ class CustomerController extends AbstractController
      */
     #[Route('/{id}', name: 'deleteCustomer', methods: ['DELETE'])]
     #[IsGranted('ROLE_ADMIN', message: 'Vous n\'avez pas les droits suffisants pour supprimer un customer')]
-    public function DeleteProduct(Customer $customer, EntityManagerInterface $em, TagAwareCacheInterface $cache): JsonResponse
+    public function DeleteCustomer(Customer $customer, EntityManagerInterface $em, TagAwareCacheInterface $cache): JsonResponse
     {
         $em->remove($customer);
         $em->flush();

@@ -8,6 +8,8 @@ use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use JMS\Serializer\SerializationContext;
 use JMS\Serializer\SerializerInterface;
+use Psr\Cache\InvalidArgumentException;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -37,7 +39,6 @@ class UserController extends AbstractController
             $item->tag("usersCache");
             $users = $userRepository->findAllWithPagination($page, $limit);
             $context = SerializationContext::create()->setGroups(['getUsers']);
-
             return $serializer->serialize($users, 'json', $context);
         });
 
@@ -83,4 +84,6 @@ class UserController extends AbstractController
         $jsonUser = $serializer->serialize($user, 'json', $context);
         return new JsonResponse($jsonUser, Response::HTTP_OK, [], true);
     }
+
+
 }
