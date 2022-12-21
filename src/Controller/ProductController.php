@@ -18,7 +18,7 @@ class ProductController extends AbstractController
     public function getAllProducts(ProductRepository $productRepository, Request $request): JsonResponse
     {
         $page = $request->get('page', 1);
-        $limit = $request->get('limit', 5);
+        $limit = $request->get('limit', 10);
 
         return $this->json($productRepository->findAllWithPagination($page, $limit), 200, [], ["groups" => ["getProducts"]]);
     }
