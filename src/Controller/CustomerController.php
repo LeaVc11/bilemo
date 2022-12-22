@@ -6,11 +6,11 @@ use App\Entity\Customer;
 use App\Repository\CustomerRepository;
 use App\Repository\UserRepository;
 use App\Security\Voter\CustomerVoter;
+use App\Services\SerializeService;
 use Doctrine\ORM\EntityManagerInterface;
 use JMS\Serializer\SerializationContext;
 use JMS\Serializer\SerializerInterface;
 use Psr\Cache\InvalidArgumentException;
-use Psr\Log\LoggerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -29,7 +29,7 @@ class CustomerController extends AbstractController
 //Cette méthode permet de récupérer l'ensemble des clients.
     #[Route('', name: 'customers', methods: ['GET'])]
     public function getAllCustomers(CustomerRepository     $customerRepository,
-                                    SerializerInterface $serializer,
+                                    SerializeService        $serializeService,
                                     Request                $request,
                                     TagAwareCacheInterface $cache
     ): JsonResponse
@@ -38,13 +38,17 @@ class CustomerController extends AbstractController
         $limit = $request->get('limit', 10);
 
 
-        $idCache = "getAllCustomers-" . $page . "-" . $limit ;
-        $customerList = $cache->get($idCache, function (ItemInterface $item) use ($customerRepository, $page, $limit,$value, $serializer) {
-      /*      echo("customer");*/
+        $idCache = "getAllCustomers-" . $page . "-" . $limit;
+        $customerList = $cache->get($idCache, function (ItemInterface $item)
+        use (
+            $serializeService,
+            $customerRepository,
+            $page, $limit,
+        ) {
+            /*      echo("customer");*/
             $item->tag("customersCache");
             $customers = $customerRepository->findAllWithPagination($page, $limit, $this->getUser());
-            $context = SerializationContext::create()->setGroups(['getCustomers']);
-            return $serializer->serialize($customers, 'json', $context);
+            return $serializeService->SendSerialize($customers, ['getCustomers']);
         });
         return new JsonResponse($customerList, Response::HTTP_OK, [], true);
     }
@@ -52,12 +56,10 @@ class CustomerController extends AbstractController
 //Cette méthode permet de récupérer un customer en particulier en fonction de son id.
 
     #[Route('/{id}', name: 'detailCustomer', methods: ['GET'])]
-    public function getCustomerDetail(Customer $customer, SerializerInterface $serializer): JsonResponse
+    public function getCustomerDetail(Customer $customer, SerializeService $serializeService): JsonResponse
     {
         $this->denyAccessUnlessGranted(CustomerVoter::VIEW, $customer);
-        $context = SerializationContext::create()->setGroups(['getCustomers']);
-        $jsonCustomer = $serializer->serialize($customer, 'json', $context);
-        return new JsonResponse($jsonCustomer, Response::HTTP_OK, [], true);
+        return $serializeService->SendSerialize($customer, ['getCustomers']);
     }
 
 //Cette méthode permet de supprimer un client par rapport à son id.
@@ -84,7 +86,7 @@ class CustomerController extends AbstractController
     #[Route('/{id}', name: "updateCustomer", methods: ['PUT'])]
     #[IsGranted('ROLE_ADMIN', message: 'Vous n\'avez pas les droits suffisants pour éditer un client')]
     public function updateCustomer(Request                $request, SerializerInterface $serializer,
-                                   Customer $customer,
+                                   Customer               $customer,
                                    Customer               $currentCustomer, EntityManagerInterface $em,
                                    UserRepository         $userRepository, ValidatorInterface $validator,
                                    TagAwareCacheInterface $cache): JsonResponse
@@ -108,6 +110,7 @@ class CustomerController extends AbstractController
         return new JsonResponse(null, Response::HTTP_NO_CONTENT);
     }
     //Cette méthode permet d'insérer un nouveau client.
+
     /**
      * @throws InvalidArgumentException
      */
