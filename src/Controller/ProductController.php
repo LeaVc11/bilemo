@@ -4,7 +4,6 @@ namespace App\Controller;
 
 use App\Entity\Product;
 use App\Repository\ProductRepository;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -19,7 +18,7 @@ class ProductController extends AbstractController
     public function getAllProducts(ProductRepository $productRepository, Request $request): JsonResponse
     {
         $page = $request->get('page', 1);
-        $limit = $request->get('limit', 5);
+        $limit = $request->get('limit', 10);
 
         return $this->json($productRepository->findAllWithPagination($page, $limit), 200, [], ["groups" => ["getProducts"]]);
     }
@@ -28,13 +27,6 @@ class ProductController extends AbstractController
     {
         $jsonProduct = $serializer->serialize($product, 'json',['groups' => 'getProducts']);
         return new JsonResponse($jsonProduct, Response::HTTP_OK, [], true);
-    }
-    #[Route('/{id}', name: 'deleteProduct' , methods: ['DELETE'])]
-    public function DeleteProduct(Product $product, EntityManagerInterface $em): JsonResponse
-    {
-        $em->remove($product);
-        $em->flush();
-        return new JsonResponse(null, Response::HTTP_NO_CONTENT);
     }
 
 }

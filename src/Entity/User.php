@@ -11,17 +11,18 @@ use Symfony\Component\Security\Core\User\UserInterface;
 use JMS\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
+
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['getUsers'])]
+    #[Groups(["getUsers", "getCustomers"])]
     private ?int $id = null;
 
     #[ORM\Column(length: 180, unique: true)]
-    #[Groups(['getUsers'])]
+    #[Groups(["getUsers", "getCustomers"])]
     private ?string $email = null;
 
     #[ORM\Column]
@@ -41,7 +42,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Assert\NotBlank(message: "Le nom de l'entreprise est obligatoire")]
     #[Assert\Length(min: 1, max: 255, minMessage: "Le nom de l'entreprise doit faire au moins {{ limit }} caractère",
         maxMessage: "Le nom de l'entreprise ne peut pas faire plus de {{ limit }} caractères")]
-    #[Groups(['getUsers'])]
+    #[Groups(['getUsers', 'getCustomers'])]
     private ?string $companyName = null;
 
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: Customer::class)]
