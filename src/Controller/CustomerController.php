@@ -6,9 +6,9 @@ use App\Entity\Customer;
 use App\Repository\CustomerRepository;
 use App\Repository\UserRepository;
 use App\Security\Voter\CustomerVoter;
+use App\Services\CacheService;
 use App\Services\SerializeService;
 use Doctrine\ORM\EntityManagerInterface;
-use JMS\Serializer\SerializationContext;
 use JMS\Serializer\SerializerInterface;
 use Psr\Cache\InvalidArgumentException;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
@@ -19,37 +19,41 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
-use Symfony\Contracts\Cache\ItemInterface;
 use Symfony\Contracts\Cache\TagAwareCacheInterface;
 
 #[Route('/api/customers', name: 'customer_')]
 class CustomerController extends AbstractController
 {
+    public function __construct(
+        private readonly CacheService $cacheService
+    )
+    {
+    }
 
 //Cette méthode permet de récupérer l'ensemble des clients.
     #[Route('', name: 'customers', methods: ['GET'])]
     public function getAllCustomers(CustomerRepository     $customerRepository,
                                     SerializeService        $serializeService,
                                     Request                $request,
-                                    TagAwareCacheInterface $cache
+
     ): JsonResponse
     {
-        $page = $request->get('page', 1);
-        $limit = $request->get('limit', 10);
-
-
-        $idCache = "getAllCustomers-" . $page . "-" . $limit;
-        $customerList = $cache->get($idCache, function (ItemInterface $item)
-        use (
-            $serializeService,
-            $customerRepository,
-            $page, $limit,
-        ) {
-            /*      echo("customer");*/
-            $item->tag("customersCache");
+        $customersData = $this->cacheService->cache($request);
+//        $page = $request->get('page', 1);
+//        $limit = $request->get('limit', 10);
+//
+//
+//        $idCache = "getAllCustomers-" . $page . "-" . $limit;
+//        $customerList = $cache->get($idCache, function (ItemInterface $item)
+//        use (
+//            $serializeService,
+//            $customerRepository,
+//            $page, $limit,
+//        ) {
+//            /*      echo("customer");*/
+//            $item->tag("customersCache");
             $customers = $customerRepository->findAllWithPagination($page, $limit, $this->getUser());
             return $serializeService->SendSerialize($customers, ['getCustomers']);
-        });
         return new JsonResponse($customerList, Response::HTTP_OK, [], true);
     }
 
@@ -117,6 +121,7 @@ class CustomerController extends AbstractController
     #[Route('/', name: 'createCustomer', methods: ['POST'])]
     #[IsGranted('ROLE_ADMIN', message: 'Vous n\'avez pas les droits suffisants pour créer un client')]
     public function createCustomer(Request                $request, SerializerInterface $serializer,
+                                   SerializeService $serializeService,
                                    UrlGeneratorInterface  $urlGenerator, TagAwareCacheInterface $cache,
                                    UserRepository         $userRepository, ValidatorInterface $validator,
                                    EntityManagerInterface $em): JsonResponse
@@ -125,7 +130,8 @@ class CustomerController extends AbstractController
 // On vérifie les erreurs
         $errors = $validator->validate($customer);
         if ($errors->count() > 0) {
-            return new JsonResponse($serializer->serialize($errors, 'json'), Response::HTTP_BAD_REQUEST, [], true);
+            return new JsonResponse($serializer->serialize($errors, 'json'), Response::HTTP_BAD_REQUEST,
+                [], true);
             //throw new HttpException(JsonResponse::HTTP_BAD_REQUEST, "La requête est invalide");
         }
         $content = $request->toArray();
@@ -135,8 +141,8 @@ class CustomerController extends AbstractController
         $em->flush();
         // On vide le cache.
         $cache->invalidateTags(["customersCache"]);
-        $context = SerializationContext::create()->setGroups(["getCustomers"]);
-        $jsonCustomer = $serializer->serialize($customer, 'json', $context);
+        return $serializeService->SendSerialize($customer, ['getCustomers']);
+
         $location = $urlGenerator->generate('customer_detailCustomer', ['id' => $customer->getId()],
             UrlGeneratorInterface::ABSOLUTE_URL);
         return new JsonResponse($jsonCustomer, Response::HTTP_CREATED, ["Location" => $location], true);
