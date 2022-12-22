@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Customer;
 use App\Repository\CustomerRepository;
 use App\Repository\UserRepository;
+use App\Security\Voter\CustomerVoter;
 use Doctrine\ORM\EntityManagerInterface;
 use JMS\Serializer\SerializationContext;
 use JMS\Serializer\SerializerInterface;
@@ -51,7 +52,7 @@ class CustomerController extends AbstractController
     #[Route('/{id}', name: 'detailCustomer', methods: ['GET'])]
     public function getCustomerDetail(Customer $customer, SerializerInterface $serializer): JsonResponse
     {
-
+        $this->denyAccessUnlessGranted(CustomerVoter::VIEW, $customer);
         $context = SerializationContext::create()->setGroups(['getCustomers']);
         $jsonCustomer = $serializer->serialize($customer, 'json', $context);
         return new JsonResponse($jsonCustomer, Response::HTTP_OK, [], true);
@@ -66,6 +67,7 @@ class CustomerController extends AbstractController
     #[IsGranted('ROLE_ADMIN', message: 'Vous n\'avez pas les droits suffisants pour supprimer un customer')]
     public function DeleteCustomer(Customer $customer, EntityManagerInterface $em, TagAwareCacheInterface $cache): JsonResponse
     {
+        $this->denyAccessUnlessGranted(CustomerVoter::VIEW, $customer);
         $em->remove($customer);
         $em->flush();
         // On vide le cache.
@@ -80,10 +82,12 @@ class CustomerController extends AbstractController
     #[Route('/{id}', name: "updateCustomer", methods: ['PUT'])]
     #[IsGranted('ROLE_ADMIN', message: 'Vous n\'avez pas les droits suffisants pour éditer un client')]
     public function updateCustomer(Request                $request, SerializerInterface $serializer,
+                                   Customer $customer,
                                    Customer               $currentCustomer, EntityManagerInterface $em,
                                    UserRepository         $userRepository, ValidatorInterface $validator,
                                    TagAwareCacheInterface $cache): JsonResponse
     {
+        $this->denyAccessUnlessGranted(CustomerVoter::VIEW, $customer);
         $newCustomer = $serializer->deserialize($request->getContent(), Customer::class, 'json');
         $currentCustomer->setName($newCustomer->getName());
         $currentCustomer->setEmail($newCustomer->getEmail());
