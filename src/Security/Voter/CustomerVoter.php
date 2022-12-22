@@ -66,5 +66,5 @@ class CustomerVoter extends Voter
         // L'admin peut modifier
         return $user === $customer->getUser();
     }
->>>>>>> develop
+
 }
