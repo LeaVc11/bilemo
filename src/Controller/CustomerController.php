@@ -7,6 +7,8 @@ use App\Repository\CustomerRepository;
 use App\Repository\UserRepository;
 use App\Security\Voter\CustomerVoter;
 use App\Services\CacheService;
+use App\Services\CustomerService;
+use App\Services\PaginatorService;
 use App\Services\SerializeService;
 use Doctrine\ORM\EntityManagerInterface;
 use JMS\Serializer\SerializerInterface;
@@ -19,26 +21,31 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Contracts\Cache\ItemInterface;
 use Symfony\Contracts\Cache\TagAwareCacheInterface;
 
 #[Route('/api/customers', name: 'customer_')]
 class CustomerController extends AbstractController
 {
     public function __construct(
-        private readonly CacheService $cacheService
+//        private readonly CacheService     $cacheService,
+        private readonly CustomerService $customerService
     )
     {
     }
-
 //Cette méthode permet de récupérer l'ensemble des clients.
     #[Route('', name: 'customers', methods: ['GET'])]
-    public function getAllCustomers(CustomerRepository     $customerRepository,
-                                    SerializeService        $serializeService,
-                                    Request                $request,
-
+    public function getAllCustomers(
+        Customer $customer,
+        CustomerService $customerService,
+        CustomerRepository $customerRepository,
+        SerializeService   $serializeService,
+        Request            $request,
     ): JsonResponse
     {
-        $customersData = $this->cacheService->cache($request);
+        //je vais chercher dans mon service customer tous les customer
+        $customer = $this->customerService->findAll();
+//        $customersData = $this->cacheService->cache($request, $customerRepository);
 //        $page = $request->get('page', 1);
 //        $limit = $request->get('limit', 10);
 //
@@ -52,17 +59,22 @@ class CustomerController extends AbstractController
 //        ) {
 //            /*      echo("customer");*/
 //            $item->tag("customersCache");
-            $customers = $customerRepository->findAllWithPagination($page, $limit, $this->getUser());
-            return $serializeService->SendSerialize($customers, ['getCustomers']);
-        return new JsonResponse($customerList, Response::HTTP_OK, [], true);
+//            $customers = $customerRepository->findAllWithPagination($page, $limit,
+//                $this->getUser());
+//            return $serializeService->SendSerialize($customers, ['getCustomers']);
+//        });
+return new JsonResponse($customer,Response::HTTP_OK, [], true);
     }
+
 
 //Cette méthode permet de récupérer un customer en particulier en fonction de son id.
 
     #[Route('/{id}', name: 'detailCustomer', methods: ['GET'])]
-    public function getCustomerDetail(Customer $customer, SerializeService $serializeService): JsonResponse
+    public function getCustomerDetail(Customer $customer, Request $request, SerializeService $serializeService): JsonResponse
     {
         $this->denyAccessUnlessGranted(CustomerVoter::VIEW, $customer);
+        //je vais dans service customer avec son id, que je mets dans ma boîte customer
+        $customer = $this->customerService->find($request->get('id'));
         return $serializeService->SendSerialize($customer, ['getCustomers']);
     }
 
@@ -121,7 +133,7 @@ class CustomerController extends AbstractController
     #[Route('/', name: 'createCustomer', methods: ['POST'])]
     #[IsGranted('ROLE_ADMIN', message: 'Vous n\'avez pas les droits suffisants pour créer un client')]
     public function createCustomer(Request                $request, SerializerInterface $serializer,
-                                   SerializeService $serializeService,
+                                   SerializeService       $serializeService,
                                    UrlGeneratorInterface  $urlGenerator, TagAwareCacheInterface $cache,
                                    UserRepository         $userRepository, ValidatorInterface $validator,
                                    EntityManagerInterface $em): JsonResponse
