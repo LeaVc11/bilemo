@@ -18,11 +18,9 @@ class SerializeService
         $this->serializer = $serializer;
     }
 
-    public function SendSerialize(mixed $dataToSerialize,
-                                  array    $groupContext): JsonResponse
+    public function SendSerialize(array $groupContext): \JMS\Serializer\Context|SerializationContext
     {
-        $context = SerializationContext::create()->setGroups($groupContext);
-        $jsonCustomer = $this->serializer->serialize($$dataToSerialize, 'json', $context);
-        return new JsonResponse($jsonCustomer, Response::HTTP_OK, [], true);
+        return SerializationContext::create()->setGroups($groupContext);
+
     }
 }

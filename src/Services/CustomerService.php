@@ -4,7 +4,8 @@ namespace App\Services;
 
 use App\Entity\Customer;
 use App\Repository\CustomerRepository;
-use JetBrains\PhpStorm\NoReturn;
+use Doctrine\ORM\EntityManagerInterface;
+
 
 class CustomerService
 {
@@ -14,7 +15,8 @@ class CustomerService
     // je crée un constructeur dans des paramètres pour construire ce que je veux
     //avec comme paramètre le customerRepo ù il y a déjà des méthodes faites pas symfony
     public function __construct(
-        private readonly CustomerRepository $customerRepository
+        private readonly CustomerRepository $customerRepository,
+        private readonly EntityManagerInterface $em
     )
     {
 
@@ -23,6 +25,7 @@ class CustomerService
    public function findAll(): array
     {
         //retourne à cette méthode. Une méthode qui est dans le customerRepo et qui envoie un message
+//        dd($this->customerRepository->findAll());
       return $this->customerRepository->findAll();
 //        dd($this->customerRepository->findAll());
     }

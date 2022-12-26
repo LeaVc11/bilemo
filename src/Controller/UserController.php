@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\User;
 use App\Repository\CustomerRepository;
 use App\Repository\UserRepository;
+use App\Services\UserService;
 use Doctrine\ORM\EntityManagerInterface;
 use JMS\Serializer\SerializationContext;
 use JMS\Serializer\SerializerInterface;
@@ -22,6 +23,11 @@ use Symfony\Contracts\Cache\TagAwareCacheInterface;
 #[Route('/api/users', name: 'user_')]
 class UserController extends AbstractController
 {
+    public function __construct(
+        private readonly UserService $userService
+    )
+    {
+    }
     #[Route('', name: 'users', methods: ['GET'])]
     public function getAllUsers(UserRepository         $userRepository,
                                 Request                $request,
@@ -29,6 +35,10 @@ class UserController extends AbstractController
                                 TagAwareCacheInterface $cache
     ): JsonResponse
     {
+        //je vais chercher dans mon service customer tous les users
+
+        $user  = $this->userService->findAll();
+
         $page = $request->get('page', 1);
         $limit = $request->get('limit', 10);
 

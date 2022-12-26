@@ -3,7 +3,6 @@
 namespace App\Controller;
 
 use App\Entity\Customer;
-use App\Repository\CustomerRepository;
 use App\Repository\UserRepository;
 use App\Security\Voter\CustomerVoter;
 use App\Services\CacheService;
@@ -21,49 +20,32 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
-use Symfony\Contracts\Cache\ItemInterface;
 use Symfony\Contracts\Cache\TagAwareCacheInterface;
 
-#[Route('/api/customers', name: 'customer_')]
+
 class CustomerController extends AbstractController
 {
     public function __construct(
-//        private readonly CacheService     $cacheService,
         private readonly CustomerService $customerService
     )
     {
     }
+
 //Cette méthode permet de récupérer l'ensemble des clients.
-    #[Route('', name: 'customers', methods: ['GET'])]
-    public function getAllCustomers(
-        Customer $customer,
-        CustomerService $customerService,
-        CustomerRepository $customerRepository,
-        SerializeService   $serializeService,
-        Request            $request,
-    ): JsonResponse
+    #[Route('/api/customers', name: 'customers', methods: ['GET'])]
+    public function getAllCustomers(SerializeService $serializeService): JsonResponse
     {
-        //je vais chercher dans mon service customer tous les customer
-        $customer = $this->customerService->findAll();
-//        $customersData = $this->cacheService->cache($request, $customerRepository);
-//        $page = $request->get('page', 1);
-//        $limit = $request->get('limit', 10);
-//
-//
-//        $idCache = "getAllCustomers-" . $page . "-" . $limit;
-//        $customerList = $cache->get($idCache, function (ItemInterface $item)
-//        use (
-//            $serializeService,
-//            $customerRepository,
-//            $page, $limit,
-//        ) {
-//            /*      echo("customer");*/
-//            $item->tag("customersCache");
-//            $customers = $customerRepository->findAllWithPagination($page, $limit,
-//                $this->getUser());
-//            return $serializeService->SendSerialize($customers, ['getCustomers']);
-//        });
-return new JsonResponse($customer,Response::HTTP_OK, [], true);
+
+        //je récupère ts les info de mes customers
+        $customerData = $this->customerService->findAll();
+
+        //je dois passer $customer data à postman
+        //je dois transforaer $cutomer data en json
+        $json = $serializeService->Sendserialize($customerData,['getCustomers']);
+        //une fois que j'ai mon json, je vais le donner à une json response
+        // qui ira vers postman
+        return new JsonResponse($json,Response::HTTP_OK,[], true);
+
     }
 
 
