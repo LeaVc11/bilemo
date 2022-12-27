@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\CustomerRepository;
 use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Constraints as Assert;
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation\Groups;
@@ -11,6 +12,7 @@ use Hateoas\Configuration\Annotation as Hateoas;
 
 
 #[ORM\Entity(repositoryClass: CustomerRepository::class)]
+#[UniqueEntity('email')]
 class Customer
 {
     #[ORM\Id]
@@ -29,6 +31,7 @@ class Customer
 
     #[ORM\Column(length: 255)]
     #[Groups(["getCustomers", "getUsers"])]
+    #[Assert\Email(message: "Votre email doit être valide.")]
     private ?string $email = null;
 
     #[ORM\ManyToOne(inversedBy: 'customer')]

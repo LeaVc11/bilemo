@@ -2,14 +2,10 @@
 
 namespace App\Controller;
 
-use App\Entity\Customer;
-use App\Repository\CustomerRepository;
-use App\Services\CacheService;
 use App\Services\CustomerService;
-use App\Services\PaginatorService;
-use App\Services\SerializeService;
 use JMS\Serializer\SerializationContext;
 use JMS\Serializer\SerializerInterface;
+use Psr\Cache\InvalidArgumentException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -25,6 +21,7 @@ class CustomerController extends AbstractController
     {
     }
 
+//Cette méthode permet de récupérer l'ensemble des clients.
     #[Route('/api/customers', name: 'customers', methods: ['GET'])]
     public function getAllCustomers(SerializerInterface $serializer, Request $request): JsonResponse
     {
@@ -39,8 +36,10 @@ class CustomerController extends AbstractController
         $json = $serializer->serialize($customerData, 'json', $context);
         return new JsonResponse($json, Response::HTTP_OK, [], true);
     }
+
+    //Cette méthode permet de récupérer un customer en particulier en fonction de son id.
     #[Route('/api/customers/{id}', name: 'detail_customers', methods: ['GET'])]
-    public function getOneCustomers(Customer $customer, Request $request, SerializerInterface $serializer)
+    public function getOneCustomers(Request $request, SerializerInterface $serializer)
     {
         // récupérer id qui est sur la route {id}
         $id = $request->get('id');
@@ -55,5 +54,17 @@ class CustomerController extends AbstractController
 
         return new JsonResponse($json, Response::HTTP_OK, [], true);
     }
+//Cette méthode permet d'insérer un nouveau client.
+
+    /**
+     * @throws InvalidArgumentException
+     */
+    #[Route('/api/customers', name: 'createCustomer', methods: ['POST'])]
+    public function createCustomer(Request $request): JsonResponse
+    {
+        $customer = $this->customerService->create($request);
+        return new JsonResponse($customer, Response::HTTP_CREATED);
+    }
+
 
 }
