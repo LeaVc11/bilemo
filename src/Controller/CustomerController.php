@@ -2,7 +2,11 @@
 
 namespace App\Controller;
 
+use App\Entity\Customer;
+use App\Entity\User;
+use App\Repository\CustomerRepository;
 use App\Services\CustomerService;
+use Doctrine\ORM\EntityManagerInterface;
 use JMS\Serializer\SerializationContext;
 use JMS\Serializer\SerializerInterface;
 use Psr\Cache\InvalidArgumentException;
@@ -11,12 +15,18 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Contracts\Cache\TagAwareCacheInterface;
 
 
 class CustomerController extends AbstractController
 {
     public function __construct(
-        private readonly CustomerService $customerService
+        private readonly CustomerService $customerService,
+        private readonly CustomerRepository $customerRepository,
+        private readonly EntityManagerInterface $em,
+        private readonly TagAwareCacheInterface $cache,
+        private readonly SerializerInterface    $serializer,
     )
     {
     }
@@ -43,8 +53,8 @@ class CustomerController extends AbstractController
     {
         // récupérer id qui est sur la route {id}
         $id = $request->get('id');
-        //chercher la méthode find qui est ds le customerService
-        $customerData = $this->customerService->find($id);
+        //chercher la méthode find qui est ds le customerRepo
+        $customerData = $this->customerRepository->find($id);
         //pr passer une entity en json, j'ai besoin de serializer
         //, mon entity Customers
         //n'a pas besoin de l'entity users pour éviter des références circulaire (pas de boucle)
@@ -59,11 +69,42 @@ class CustomerController extends AbstractController
      * @throws InvalidArgumentException
      */
     #[Route('/api/customers', name: 'createCustomer', methods: ['POST'])]
-    public function createCustomer(Request $request): JsonResponse
+    public function createCustomer(Request $request, SerializerInterface $serializer, ValidatorInterface $validator): JsonResponse
     {
-        $customer = $this->customerService->create($request);
+        $customer = $serializer->deserialize($request->getContent(), Customer::class, 'json');
+
+        // On vérifie les erreurs
+        $errors = $validator->validate($customer);
+        if ($errors->count() > 0) {
+            return new JsonResponse($serializer->serialize($errors, 'json'), Response::HTTP_BAD_REQUEST, [], true);
+            //throw new HttpException(JsonResponse::HTTP_BAD_REQUEST, "La requête est invalide");
+        }
+        $user = $this->getUser();
+        $this->cache->invalidateTags(["customerCache"]);
+        $customer = $this->serializer->deserialize(
+            $request->getContent(), Customer::class, 'json'
+        );
+
+//        dd($customer);
+        $this->em->persist($customer);
+        $this->em->flush();
+        $this->verifyCustomer($customer);
+//        dd($customer);
+        $customer->setUser($user);
+dd($customer);
+
         return new JsonResponse($customer, Response::HTTP_CREATED);
     }
-
+    private function verifyCustomer($customer): bool
+    {
+        //Il y a  pas de user ds la bdd avec email que tu reçois de la requête tu renvoie true
+        if (!$this->customerRepository->findOneBy(['email' => $customer->getEmail()])) {
+//            dd('c\'est bon');
+            return true;
+        }
+        // par défaut tu renvoie false
+//        dd('c\'est pas bon');
+        return false;
+    }
 
 }
