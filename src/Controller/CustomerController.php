@@ -84,14 +84,13 @@ class CustomerController extends AbstractController
         $customer = $this->serializer->deserialize(
             $request->getContent(), Customer::class, 'json'
         );
-
 //        dd($customer);
         $this->em->persist($customer);
         $this->em->flush();
         $this->verifyCustomer($customer);
-//        dd($customer);
+//        dd($user);
         $customer->setUser($user);
-dd($user);
+//dd($user);
 
         return new JsonResponse($customer, Response::HTTP_CREATED);
     }
