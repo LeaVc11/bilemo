@@ -24,7 +24,7 @@ class CustomerService
         private readonly CustomerRepository     $customerRepository,
         private readonly TagAwareCacheInterface $cache,
         private readonly SerializerInterface    $serializer,
-        private readonly EntityManagerInterface $em,
+
     )
     {
 

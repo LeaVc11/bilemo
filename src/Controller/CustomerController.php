@@ -91,7 +91,7 @@ class CustomerController extends AbstractController
         $this->verifyCustomer($customer);
 //        dd($customer);
         $customer->setUser($user);
-dd($customer);
+dd($user);
 
         return new JsonResponse($customer, Response::HTTP_CREATED);
     }
