@@ -45,7 +45,7 @@ class CustomerController extends AbstractController
         $id = $request->get('id');
         //chercher la méthode find qui est ds le customerService
         $customerData = $this->customerService->find($id);
-        //pr passer une entity en json, j'ai besoin de la serializé
+        //pr passer une entity en json, j'ai besoin de serializer
         //, mon entity Customers
         //n'a pas besoin de l'entity users pour éviter des références circulaire (pas de boucle)
         $context = SerializationContext::create()->setGroups(['getCustomers']);
@@ -55,7 +55,6 @@ class CustomerController extends AbstractController
         return new JsonResponse($json, Response::HTTP_OK, [], true);
     }
 //Cette méthode permet d'insérer un nouveau client.
-
     /**
      * @throws InvalidArgumentException
      */

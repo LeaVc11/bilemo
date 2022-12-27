@@ -58,7 +58,7 @@ class UserController extends AbstractController
      * @throws InvalidArgumentException
      */
     #[Route('', name: 'createUser', methods: ['POST'])]
-    public function createUser(Request $request,
+    public function createOneUser(Request $request,
                                UrlGeneratorInterface  $urlGenerator,
                                TagAwareCacheInterface $cache,
                                SerializerInterface $serializer,
