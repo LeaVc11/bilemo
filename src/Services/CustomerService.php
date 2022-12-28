@@ -58,42 +58,42 @@ class CustomerService
 //    }
     // je crée une méthode cache (mise en place d’un système de cache).
 
-    public function findAllWithPagination($page, $limit)
-    {
-        // Une méthode qui est dans le customerRepo et qui envoie un tableau d'objets
-        // Avec 2 paramètres page et limit
-        return $this->customerRepository->findAllWithPagination($page, $limit);
-
-    }
-
-    /**
-     * @throws InvalidArgumentException
-     */
-    public function create(Request $request, User $user)
-    {
-
-        $this->cache->invalidateTags(["customerCache"]);
-        $customer = $this->serializer->deserialize(
-            $request->getContent(), Customer::class, 'json'
-        );
-        $this->verifyCustomer($customer);
-//        dd($customer);
-        $customer->setUser($user);
-//dd($customer);
-        return $customer;
-    }
-
-    private function verifyCustomer($customer): bool
-    {
-        //Il y a  pas de user ds la bdd avec email que tu reçois de la requête tu renvoie true
-        if (!$this->customerRepository->findOneBy(['email' => $customer->getEmail()])) {
-//            dd('c\'est bon');
-            return true;
-        }
-        // par défaut tu renvoie false
-//        dd('c\'est pas bon');
-        return false;
-    }
+//    public function findAllWithPagination($page, $limit)
+//    {
+//        // Une méthode qui est dans le customerRepo et qui envoie un tableau d'objets
+//        // Avec 2 paramètres page et limit
+//        return $this->customerRepository->findAllWithPagination($page, $limit);
+//
+//    }
+//
+//    /**
+//     * @throws InvalidArgumentException
+//     */
+//    public function create(Request $request, User $user)
+//    {
+//
+//        $this->cache->invalidateTags(["customerCache"]);
+//        $customer = $this->serializer->deserialize(
+//            $request->getContent(), Customer::class, 'json'
+//        );
+//        $this->verifyCustomer($customer);
+////        dd($customer);
+//        $customer->setUser($user);
+////dd($customer);
+//        return $customer;
+//    }
+//
+//    private function verifyCustomer($customer): bool
+//    {
+//        //Il y a  pas de user ds la bdd avec email que tu reçois de la requête tu renvoie true
+//        if (!$this->customerRepository->findOneBy(['email' => $customer->getEmail()])) {
+////            dd('c\'est bon');
+//            return true;
+//        }
+//        // par défaut tu renvoie false
+////        dd('c\'est pas bon');
+//        return false;
+//    }
 
 
 }
