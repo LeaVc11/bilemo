@@ -16,13 +16,13 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Contracts\Cache\ItemInterface;
 use Symfony\Contracts\Cache\TagAwareCacheInterface;
 
 
 class CustomerController extends AbstractController
 {
     public function __construct(
-        private readonly CustomerService $customerService,
         private readonly CustomerRepository $customerRepository,
         private readonly EntityManagerInterface $em,
         private readonly TagAwareCacheInterface $cache,
@@ -33,19 +33,46 @@ class CustomerController extends AbstractController
 
 //Cette méthode permet de récupérer l'ensemble des clients.
     #[Route('/api/customers', name: 'customers', methods: ['GET'])]
-    public function getAllCustomers(SerializerInterface $serializer, Request $request): JsonResponse
+    public function getAllCustomers(SerializerInterface $serializer, CustomerRepository $customerRepository, TagAwareCacheInterface $cache, Request $request): JsonResponse
     {
+        $page = $request->get('page', 1);
+        $limit = $request->get('limit', 10);
 
-        // dans customerData = je vais récupérer dans mon customerService
-        $customerData = $this->customerService->cache($request);
-        //pr passer une entity en json, j'ai besoin de la serializé
-        //, mon entity Customers
-        //n'a pas besoin de l'entity users pour éviter des références circulaire (pas de boucle)
-        $context = SerializationContext::create()->setGroups(['getCustomers']);
-        // besoin de transformer entity Customers en string (json)
-        $json = $serializer->serialize($customerData, 'json', $context);
-        return new JsonResponse($json, Response::HTTP_OK, [], true);
+        $idCache = "getAllCustomers-" . $page . "-" . $limit;
+        $customerList = $cache->get($idCache, function(ItemInterface $item) use ($customerRepository, $page, $limit){
+            echo ("customer");
+            $item->tag("customersCache");
+            return $customerRepository->findAllWithPagination($page, $limit, $this->getUser());
+        });
+        return $this->json($customerList, 200, [], ["groups" => ["getCustomers"]]);
     }
+//        // dans customerData = je vais récupérer dans mon customerService
+////        $customerData = $this->customerService->cache($request);
+//        //chercher sur la route une page avec un numéro
+//        // avec une valeur par défaut
+//        //
+//        $page = (int)$request->get(key: 'page', default: 1);
+//        //chercher sur la route avec une limit avec un numéro
+//        //avec une valeur par défaut
+//        $limit = (int)$request->get(key: 'limit', default: 3);
+//        //j’ai créé ici un identifiant
+//        //Il est construit ici avec le mot getAllCustomers
+//        $idCache = "getAllCustomers-" . $page . "-" . $limit;
+//        $jsonCustomerList = $cache->get($idCache,
+//            function (ItemInterface $item) use ($customerRepository, $page, $limit, $serializer) {
+//                echo("customer");
+//                $item->tag("customersCache");
+//                $customerList = $customerRepository->findAllWithPagination($page, $limit);
+//                //pr passer une entity en json, j'ai besoin de la serializé
+//                //, mon entity Customers
+//                //n'a pas besoin de l'entity users pour éviter des références circulaire (pas de boucle)
+//                $context = SerializationContext::create()->setGroups(['getCustomers']);
+//                // besoin de transformer entity Customers en string (json)
+//                return $serializer->serialize($customerList, 'json', $context);
+//
+//            });
+//        return new JsonResponse($jsonCustomerList, Response::HTTP_OK, [], true);
+//    }
 
     //Cette méthode permet de récupérer un customer en particulier en fonction de son id.
     #[Route('/api/customers/{id}', name: 'detail_customers', methods: ['GET'])]
@@ -69,30 +96,25 @@ class CustomerController extends AbstractController
      * @throws InvalidArgumentException
      */
     #[Route('/api/customers', name: 'createCustomer', methods: ['POST'])]
-    public function createCustomer(Request $request, SerializerInterface $serializer, ValidatorInterface $validator): JsonResponse
+    public function createOneCustomer(Request $request, SerializerInterface $serializer, ValidatorInterface $validator): JsonResponse
     {
-        $customer = $serializer->deserialize($request->getContent(), Customer::class, 'json');
+        {
 
-        // On vérifie les erreurs
-        $errors = $validator->validate($customer);
-        if ($errors->count() > 0) {
-            return new JsonResponse($serializer->serialize($errors, 'json'), Response::HTTP_BAD_REQUEST, [], true);
-            //throw new HttpException(JsonResponse::HTTP_BAD_REQUEST, "La requête est invalide");
-        }
-        $user = $this->getUser();
-        $this->cache->invalidateTags(["customerCache"]);
-        $customer = $this->serializer->deserialize(
-            $request->getContent(), Customer::class, 'json'
-        );
+            $user = $this->getUser(); // je recupere le user connecté
+            $this->cache->invalidateTags(["customerCache"]); // j'invalide le cache
+            $customer = $this->serializer->deserialize(
+                $request->getContent(), Customer::class, 'json'
+            ); // je serialize les data que je recois de la requete
 //        dd($customer);
-        $this->em->persist($customer);
-        $this->em->flush();
-        $this->verifyCustomer($customer);
-//        dd($user);
-        $customer->setUser($user);
-//dd($user);
+            $this->verifyCustomer($customer); // je vérifie le customer
+//            dd($user); // je fais un var_dump
+            $customer->setUser($user); // j'ajoute un User au Customer
+            $this->em->persist($customer); // j'ecris le sql
+            $this->em->flush(); // j'execute le sql => la j'écris dans la base de données
 
-        return new JsonResponse($customer, Response::HTTP_CREATED);
+            return new JsonResponse($customer, Response::HTTP_CREATED);
+        }
+
     }
     private function verifyCustomer($customer): bool
     {
