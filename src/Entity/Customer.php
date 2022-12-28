@@ -35,6 +35,7 @@ class Customer
     private ?string $email = null;
 
     #[ORM\ManyToOne(inversedBy: 'customer')]
+    #[Groups(["getCustomers", "getUsers"])]
     private ?User $user = null;
 
 

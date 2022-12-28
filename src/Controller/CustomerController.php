@@ -50,22 +50,22 @@ class CustomerController extends AbstractController
         //j’ai créé ici un identifiant
         //Il est construit ici avec le mot getAllCustomers
         $idCache = "getAllCustomers-" . $page . "-" . $limit;
-        $jsonCustomerList = $cache->get($idCache,
+        $customerList = $cache->get($idCache,
             function (ItemInterface $item) use ($customerRepository, $page, $limit, $serializer) {
                 echo("customer");
                 $item->tag("customersCache");
                 // Une méthode qui est dans le customerRepo et qui envoie un tableau d'objets
                 // Avec 2 paramètres page et limit
-                $customerList = $customerRepository->findAllWithPagination($page, $limit, $this->getUser());
+                $customers = $customerRepository->findAllWithPagination($page, $limit, $this->getUser());
                 //pr passer une entity en json, j'ai besoin de la serializé
                 //, mon entity Customers
                 //n'a pas besoin de l'entity users pour éviter des références circulaire (pas de boucle)
                 $context = SerializationContext::create()->setGroups(['getCustomers']);
                 // besoin de transformer entity Customers en string (json)
-                return $serializer->serialize($customerList, 'json', $context);
+                return $serializer->serialize($customers, 'json', $context);
 
             });
-        return new JsonResponse($jsonCustomerList, Response::HTTP_OK, [], true);
+        return new JsonResponse($customerList, Response::HTTP_OK, [], true);
     }
 
     //Cette méthode permet de récupérer un customer en particulier en fonction de son id.
@@ -126,7 +126,7 @@ class CustomerController extends AbstractController
     /**
      * @throws InvalidArgumentException
      */
-    #[Route('/{id}', name: 'deleteCustomer', methods: ['DELETE'])]
+    #[Route('/api/customers/{id}', name: 'deleteCustomer', methods: ['DELETE'])]
     public function DeleteCustomer(Customer $customer, EntityManagerInterface $em, TagAwareCacheInterface $cache): JsonResponse
     {
         $em->remove($customer);
