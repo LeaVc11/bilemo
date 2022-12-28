@@ -140,14 +140,18 @@ class CustomerController extends AbstractController
     /**
      * @throws InvalidArgumentException
      */
-    #[Route('/{id}', name: "updateCustomer", methods: ['PUT'])]
+    #[Route('/api/customers/{id}', name: "updateCustomer", methods: ['PUT'])]
 
     public function updateCustomer(Request                $request, SerializerInterface $serializer,
                                    Customer               $currentCustomer, EntityManagerInterface $em,
-                                   UserRepository         $userRepository, ValidatorInterface $validator,
+                                   ValidatorInterface $validator,
                                    TagAwareCacheInterface $cache): JsonResponse
     {
+        // On vide le cache.
+        $cache->invalidateTags(["customersCache"]);
+
         $newCustomer = $serializer->deserialize($request->getContent(), Customer::class, 'json');
+
         $currentCustomer->setName($newCustomer->getName());
         $currentCustomer->setEmail($newCustomer->getEmail());
         // On vérifie les erreurs
@@ -155,13 +159,9 @@ class CustomerController extends AbstractController
         if ($errors->count() > 0) {
             return new JsonResponse($serializer->serialize($errors, 'json'), Response::HTTP_BAD_REQUEST, [], true);
         }
-        $content = $request->toArray();
-        $idUser = $content['idUser'] ?? -1;
-        $currentCustomer->setUser($userRepository->find($idUser));
         $em->persist($currentCustomer);
         $em->flush();
-        // On vide le cache.
-        $cache->invalidateTags(["customersCache"]);
+
         return new JsonResponse(null, Response::HTTP_NO_CONTENT);
     }
 
