@@ -23,7 +23,7 @@ class ProductController extends AbstractController
         return $this->json($productRepository->findAllWithPagination($page, $limit), 200, [], ["groups" => ["getProducts"]]);
     }
     #[Route('/{id}', name: 'detailProduct' , methods: ['GET'])]
-    public function getProductDetail(Product $product, SerializerInterface $serializer): JsonResponse
+    public function getOneProduct(Product $product, SerializerInterface $serializer): JsonResponse
     {
         $jsonProduct = $serializer->serialize($product, 'json',['groups' => 'getProducts']);
         return new JsonResponse($jsonProduct, Response::HTTP_OK, [], true);

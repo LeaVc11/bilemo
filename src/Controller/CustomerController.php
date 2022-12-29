@@ -3,10 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Customer;
-use App\Entity\User;
 use App\Repository\CustomerRepository;
-use App\Repository\UserRepository;
-use App\Services\CustomerService;
 use Doctrine\ORM\EntityManagerInterface;
 use JMS\Serializer\SerializationContext;
 use JMS\Serializer\SerializerInterface;

@@ -35,10 +35,6 @@ class UserController extends AbstractController
                                 TagAwareCacheInterface $cache
     ): JsonResponse
     {
-        //je vais chercher dans mon service customer tous les users
-
-        $user  = $this->userService->findAll();
-
         $page = $request->get('page', 1);
         $limit = $request->get('limit', 10);
 
@@ -90,7 +86,7 @@ class UserController extends AbstractController
     }
 
     #[Route('/{id}', name: 'detailUser', methods: ['GET'])]
-    public function getDetailUser(User $user, SerializerInterface $serializer): JsonResponse
+    public function getOnelUser(User $user, SerializerInterface $serializer): JsonResponse
     {
         $context = SerializationContext::create()->setGroups(['getUsers']);
 
