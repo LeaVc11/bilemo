@@ -10,9 +10,21 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use JMS\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
+use Hateoas\Configuration\Annotation as Hateoas;
 
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
+/**
+ * @Hateoas\Relation(
+ *      "self",
+ *      href = @Hateoas\Route(
+ *          "detail_user",
+ *          parameters = { "id" = "expr(object.getId())" }
+ *      ),
+ *      exclusion = @Hateoas\Exclusion(groups="getUsers")
+ * )
+ *
+ */
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
@@ -23,6 +35,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column(length: 180, unique: true)]
     #[Groups(["getUsers", "getCustomers"])]
+    #[Assert\Email(message: "Votre email doit être valide.")]
     private ?string $email = null;
 
     #[ORM\Column]
@@ -46,7 +59,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $companyName = null;
 
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: Customer::class)]
-    #[Groups(['getUsers'])]
+    #[Groups(["getUsers", "getCustomers" ])]
     private Collection $customer;
 
     public function __construct()

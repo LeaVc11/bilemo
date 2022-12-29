@@ -20,15 +20,14 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Contracts\Cache\ItemInterface;
 use Symfony\Contracts\Cache\TagAwareCacheInterface;
 
-#[Route('/api/users', name: 'user_')]
 class UserController extends AbstractController
 {
     public function __construct(
-        private readonly UserService $userService
+
     )
     {
     }
-    #[Route('', name: 'users', methods: ['GET'])]
+    #[Route('/api/users', name: 'users', methods: ['GET'])]
     public function getAllUsers(UserRepository         $userRepository,
                                 Request                $request,
                                 SerializerInterface $serializer,
@@ -49,11 +48,18 @@ class UserController extends AbstractController
 
         return new JsonResponse($userList, Response::HTTP_OK, [], true);
     }
+    #[Route('/api/users/{id}', name: 'detail_user', methods: ['GET'])]
+    public function getOnelUser(User $user, SerializerInterface $serializer): JsonResponse
+    {
+        $context = SerializationContext::create()->setGroups(['getUsers']);
 
+        $jsonUser = $serializer->serialize($user, 'json', $context);
+        return new JsonResponse($jsonUser, Response::HTTP_OK, [], true);
+    }
     /**
      * @throws InvalidArgumentException
      */
-    #[Route('', name: 'createUser', methods: ['POST'])]
+    #[Route('/api/users', name: 'createUser', methods: ['POST'])]
     public function createOneUser(Request $request,
                                UrlGeneratorInterface  $urlGenerator,
                                TagAwareCacheInterface $cache,
@@ -85,14 +91,7 @@ class UserController extends AbstractController
 
     }
 
-    #[Route('/{id}', name: 'detailUser', methods: ['GET'])]
-    public function getOnelUser(User $user, SerializerInterface $serializer): JsonResponse
-    {
-        $context = SerializationContext::create()->setGroups(['getUsers']);
 
-        $jsonUser = $serializer->serialize($user, 'json', $context);
-        return new JsonResponse($jsonUser, Response::HTTP_OK, [], true);
-    }
 
 
 }

@@ -8,6 +8,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use JMS\Serializer\SerializationContext;
 use JMS\Serializer\SerializerInterface;
 use Psr\Cache\InvalidArgumentException;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -28,7 +29,6 @@ class CustomerController extends AbstractController
     )
     {
     }
-
 //Cette méthode permet de récupérer l'ensemble des clients.
 
     /**
@@ -66,7 +66,7 @@ class CustomerController extends AbstractController
     }
 
     //Cette méthode permet de récupérer un customer en particulier en fonction de son id.
-    #[Route('/api/customers/{id}', name: 'detail_customers', methods: ['GET'])]
+    #[Route('/api/customers/{id}', name: 'detail_customer', methods: ['GET'])]
     public function getOneCustomers(Request $request, SerializerInterface $serializer)
     {
         // récupérer id qui est sur la route {id}
@@ -87,6 +87,7 @@ class CustomerController extends AbstractController
      * @throws InvalidArgumentException
      */
     #[Route('/api/customers', name: 'createCustomer', methods: ['POST'])]
+    #[IsGranted('ROLE_ADMIN', message: 'Vous n\'avez pas les droits suffisants pour créer un customer')]
     public function createOneCustomer(Request $request, SerializerInterface $serializer, ValidatorInterface $validator): JsonResponse
     {
         {
@@ -124,6 +125,7 @@ class CustomerController extends AbstractController
      * @throws InvalidArgumentException
      */
     #[Route('/api/customers/{id}', name: 'deleteCustomer', methods: ['DELETE'])]
+    #[IsGranted('ROLE_ADMIN', message: 'Vous n\'avez pas les droits suffisants pour supprimer un customer')]
     public function DeleteCustomer(Customer $customer, EntityManagerInterface $em, TagAwareCacheInterface $cache): JsonResponse
     {
         $em->remove($customer);
@@ -138,7 +140,7 @@ class CustomerController extends AbstractController
      * @throws InvalidArgumentException
      */
     #[Route('/api/customers/{id}', name: "updateCustomer", methods: ['PUT'])]
-
+    #[IsGranted('ROLE_ADMIN', message: 'Vous n\'avez pas les droits suffisants pour éditer un customer')]
     public function updateCustomer(Request                $request, SerializerInterface $serializer,
                                    Customer               $currentCustomer, EntityManagerInterface $em,
                                    ValidatorInterface $validator,

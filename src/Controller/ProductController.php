@@ -11,10 +11,10 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\SerializerInterface;
 
-#[Route('/api/products', name: 'product_')]
+
 class ProductController extends AbstractController
 {
-    #[Route('', name: 'products' , methods: ['GET'])]
+    #[Route('/api/products', name: 'products' , methods: ['GET'])]
     public function getAllProducts(ProductRepository $productRepository, Request $request): JsonResponse
     {
         $page = $request->get('page', 1);
@@ -22,7 +22,7 @@ class ProductController extends AbstractController
 
         return $this->json($productRepository->findAllWithPagination($page, $limit), 200, [], ["groups" => ["getProducts"]]);
     }
-    #[Route('/{id}', name: 'detailProduct' , methods: ['GET'])]
+    #[Route('/api/products/{id}', name: 'detail_product' , methods: ['GET'])]
     public function getOneProduct(Product $product, SerializerInterface $serializer): JsonResponse
     {
         $jsonProduct = $serializer->serialize($product, 'json',['groups' => 'getProducts']);
