@@ -67,8 +67,11 @@ class CustomerController extends AbstractController
 
     //Cette méthode permet de récupérer un customer en particulier en fonction de son id.
     #[Route('/api/customers/{id}', name: 'detail_customer', methods: ['GET'])]
-    public function getOneCustomer(Request $request, SerializerInterface $serializer)
+    #[IsGranted('ROLE_ADMIN', message: 'Vous n\'avez pas les droits suffisants pour voir un customer')]
+    public function getOneCustomer(Customer $customer,Request $request, SerializerInterface $serializer)
     {
+        //on doit vérifier l'accès avec la méthode
+        $this->denyAccessUnlessGranted('CUSTOMER_VIEW', $customer);
         // récupérer id qui est sur la route {id}
         $id = $request->get('id');
         //chercher la méthode find qui est ds le customerRepo
@@ -128,6 +131,7 @@ class CustomerController extends AbstractController
     #[IsGranted('ROLE_ADMIN', message: 'Vous n\'avez pas les droits suffisants pour supprimer un customer')]
     public function DeleteCustomer(Customer $customer, EntityManagerInterface $em, TagAwareCacheInterface $cache): JsonResponse
     {
+        $this->denyAccessUnlessGranted('CUSTOMER_DELETE', $customer);
         $em->remove($customer);
         $em->flush();
         // On vide le cache.
@@ -140,12 +144,13 @@ class CustomerController extends AbstractController
      * @throws InvalidArgumentException
      */
     #[Route('/api/customers/{id}', name: "updateCustomer", methods: ['PUT'])]
-    #[IsGranted('ROLE_ADMIN', message: 'Vous n\'avez pas les droits suffisants pour éditer un customer')]
+    #[IsGranted('ROLE_ADMIN', message: 'Vous n\'avez pas les droits suffisants pour mettre à jour un customer')]
     public function updateCustomer(Request                $request, SerializerInterface $serializer,
                                    Customer               $currentCustomer, EntityManagerInterface $em,
-                                   ValidatorInterface $validator,
+                                   ValidatorInterface $validator, Customer $customer,
                                    TagAwareCacheInterface $cache): JsonResponse
     {
+        $this->denyAccessUnlessGranted('CUSTOMER_UPDATE', $customer);
         // On vide le cache.
         $cache->invalidateTags(["customersCache"]);
 
