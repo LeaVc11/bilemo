@@ -67,7 +67,7 @@ class CustomerController extends AbstractController
 
     //Cette méthode permet de récupérer un customer en particulier en fonction de son id.
     #[Route('/api/customers/{id}', name: 'detail_customer', methods: ['GET'])]
-    public function getOneCustomers(Request $request, SerializerInterface $serializer)
+    public function getOneCustomer(Request $request, SerializerInterface $serializer)
     {
         // récupérer id qui est sur la route {id}
         $id = $request->get('id');
@@ -88,7 +88,7 @@ class CustomerController extends AbstractController
      */
     #[Route('/api/customers', name: 'createCustomer', methods: ['POST'])]
     #[IsGranted('ROLE_ADMIN', message: 'Vous n\'avez pas les droits suffisants pour créer un customer')]
-    public function createOneCustomer(Request $request, SerializerInterface $serializer, ValidatorInterface $validator): JsonResponse
+    public function createOneCustomer(Request $request): JsonResponse
     {
         {
 

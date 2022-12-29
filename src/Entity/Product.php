@@ -9,6 +9,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 use Hateoas\Configuration\Annotation as Hateoas;
 
+
 #[ORM\Entity(repositoryClass: ProductRepository::class)]
 /**
  * @Hateoas\Relation(
@@ -26,14 +27,14 @@ class Product
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(["getProducts"])]
+    #[Groups(["getProducts", "getCustomers"])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
     #[Assert\NotBlank(message: "Le nom est obligatoire")]
     #[Assert\Length(min: 1, max: 255, minMessage: "Le nom doit faire au moins {{ limit }} caractère",
         maxMessage: "Le nom ne peut pas faire plus de {{ limit }} caractères")]
-    #[Groups(["getProducts"])]
+    #[Groups(["getProducts", "getCustomers"])]
     private ?string $name = null;
 
     #[ORM\Column]
@@ -45,7 +46,7 @@ class Product
     private ?\DateTimeImmutable $updatedAt = null;
 
     #[ORM\Column(type: Types::TEXT)]
-    #[Groups(["getProducts"])]
+    #[Groups(["getProducts", "getCustomers"])]
     private ?string $description = null;
 
     #[ORM\Column]
