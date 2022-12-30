@@ -7,6 +7,7 @@ use App\Repository\CustomerRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use JMS\Serializer\SerializationContext;
 use JMS\Serializer\SerializerInterface;
+use OpenApi\Annotations as OA;
 use Psr\Cache\InvalidArgumentException;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -21,6 +22,7 @@ use Symfony\Contracts\Cache\TagAwareCacheInterface;
 
 class CustomerController extends AbstractController
 {
+
     public function __construct(
         private readonly CustomerRepository $customerRepository,
         private readonly EntityManagerInterface $em,
@@ -29,8 +31,35 @@ class CustomerController extends AbstractController
     )
     {
     }
-//Cette méthode permet de récupérer l'ensemble des clients.
-
+    /**
+     * Cette méthode permet de récupérer l'ensemble des customers.
+     *
+     *   //La réponse attendu
+     * @OA\Response(
+     *     response=200,
+     *     description="Retourne la liste des customers",
+     *     @OA\JsonContent(
+     *        type="array",
+     *        @OA\Items(ref=@Model(type=Customer  ::class, groups={"getCustomers"}))
+     *     )
+     * )
+     *    // Paginator = nombre de page
+     * @OA\Parameter(
+     *     name="page",
+     *     in="query",
+     *     description="La page que l'on veut récupérer",
+     *     @OA\Schema(type="int")
+     * )
+     *  // Paginator = nombre de limit
+     * @OA\Parameter(
+     *     name="limit",
+     *     in="query",
+     *     description="Le nombre d'éléments que l'on veut récupérer",
+     *     @OA\Schema(type="int")
+     * )
+     * @OA\Tag(name="Customers")
+     *
+     */
     /**
      * @throws InvalidArgumentException
      */
