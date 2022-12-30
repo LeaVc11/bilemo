@@ -7,6 +7,8 @@ use App\Repository\CustomerRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use JMS\Serializer\SerializationContext;
 use JMS\Serializer\SerializerInterface;
+use Nelmio\ApiDocBundle\Annotation\Model;
+use Nelmio\ApiDocBundle\Annotation\Security;
 use OpenApi\Annotations as OA;
 use Psr\Cache\InvalidArgumentException;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
@@ -31,6 +33,11 @@ class CustomerController extends AbstractController
     )
     {
     }
+
+    /**
+     * @throws InvalidArgumentException
+     */
+    #[Route('/api/customers', name: 'customers', methods: ['GET'])]
     /**
      * Cette méthode permet de récupérer l'ensemble des customers.
      *
@@ -40,7 +47,7 @@ class CustomerController extends AbstractController
      *     description="Retourne la liste des customers",
      *     @OA\JsonContent(
      *        type="array",
-     *        @OA\Items(ref=@Model(type=Customer  ::class, groups={"getCustomers"}))
+     *        @OA\Items(ref=@Model(type=Customer::class, groups={"getCustomers"}))
      *     )
      * )
      *    // Paginator = nombre de page
@@ -60,10 +67,6 @@ class CustomerController extends AbstractController
      * @OA\Tag(name="Customers")
      *
      */
-    /**
-     * @throws InvalidArgumentException
-     */
-    #[Route('/api/customers', name: 'customers', methods: ['GET'])]
     public function getAllCustomers(SerializerInterface $serializer, CustomerRepository $customerRepository, TagAwareCacheInterface $cache, Request $request): JsonResponse
     {
         //chercher sur la route une page avec un numéro
