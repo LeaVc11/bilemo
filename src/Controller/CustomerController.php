@@ -97,8 +97,8 @@ class CustomerController extends AbstractController
     public function createOneCustomer(Request $request): JsonResponse
     {
         {
-            $user = $this->getUser(); // je recupere le user connecté
-            $this->cache->invalidateTags(["customerCache"]); // j'invalide le cache
+            $user = $this->getUser();
+            $this->cache->invalidateTags(["customerCache"]);
             $customer = $this->serializer->deserialize(
                 $request->getContent(), Customer::class, 'json'
             );

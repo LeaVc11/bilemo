@@ -7,6 +7,7 @@ use App\Entity\User;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 class CustomerVoter extends Voter
 {
@@ -30,9 +31,9 @@ class CustomerVoter extends Voter
 
     protected function voteOnAttribute(string $attribute, mixed $subject, TokenInterface $token): bool {
 
-        $customer = $token->getUser();
+        $user = $token->getUser();
 
-        if (!$customer instanceof Customer) {
+        if (! $user instanceof UserInterface) {
             return false;
         }
         if ($this->security->isGranted('ROLE_ADMIN'))
@@ -46,7 +47,7 @@ class CustomerVoter extends Voter
 
             self::UPDATE,
             self::VIEW,
-            self::DELETE => $this->canOperate($subject, $customer),
+            self::DELETE => $this->canOperate($subject,  $user),
             default => false,
         };
     }
