@@ -15,7 +15,14 @@ use Symfony\Contracts\Cache\TagAwareCacheInterface;
 
 class CustomerService
 {
+    // CONTAINER DE SERVICE
 
+//c\'est le hangar ou tu vas ranger les palettes et quand tu vas avoir besoin de remplir un rayon, tu vas aller chercher une palette.
+// Avec uniquement de l'injection de dépendances, tu es toute seule à aller chercher la palette et faire la mise en rayon. (fatiguant)
+//symfony console debug:autowiring
+//vec Autowiring, c'est comme si tu avais un magasinier qui t'apportes la palette dont tu as besoin du coup plus facile pour, la mise en rayon ca va plus vite!
+//je fais quand même la mise en rayon, mais le c\'est le magasinier qui fait les allers-retours pour te livrer les palettes
+//Le magasinier sait : où c'est rangé, comment c'est rangé, comment te les apporter rapidement et il est capable de gérer son hangar
     // je crée une méthode dans mon Service
 
     // je crée un constructeur dans des paramètres pour construire ce que je veux
