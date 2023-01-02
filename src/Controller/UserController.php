@@ -56,41 +56,4 @@ class UserController extends AbstractController
         $jsonUser = $serializer->serialize($user, 'json', $context);
         return new JsonResponse($jsonUser, Response::HTTP_OK, [], true);
     }
-//    /**
-//     * @throws InvalidArgumentException
-//     */
-//    #[Route('/api/users', name: 'createUser', methods: ['POST'])]
-//    public function createOneUser(Request $request,
-//                               UrlGeneratorInterface  $urlGenerator,
-//                               TagAwareCacheInterface $cache,
-//                               SerializerInterface $serializer,
-//                               EntityManagerInterface $em,
-//                               CustomerRepository $customerRepository,
-//                               ValidatorInterface $validator): JsonResponse
-//    {
-//        $user = $serializer->deserialize($request->getContent(), User::class, 'json');
-//
-//        // On vérifie les erreurs
-//        $errors = $validator->validate($user);
-//        if ($errors->count() > 0) {
-//            return new JsonResponse($serializer->serialize($errors, 'json'), Response::HTTP_BAD_REQUEST, [], true);
-//            //throw new HttpException(JsonResponse::HTTP_BAD_REQUEST, "La requête est invalide");
-//        }
-//        $content = $request->toArray();
-//        $idCustomer = $content['idCustomer'] ?? -1;
-//        $user->setCustomer($customerRepository->find($idCustomer));
-//
-//        $em->persist($user);
-//        $em->flush();
-//        $cache->invalidateTags(["usersCache"]);
-//        $context = SerializationContext::create()->setGroups(["getUsers"]);
-//        $jsonUser = $serializer->serialize($user, 'json', $context);
-//        $location = $urlGenerator->generate('user_detailUser', ['id' => $user->getId()],
-//            UrlGeneratorInterface::ABSOLUTE_URL);
-//        return new JsonResponse($jsonUser, Response::HTTP_CREATED, [], true);
-//    }
-
-
-
-
 }

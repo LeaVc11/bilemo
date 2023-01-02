@@ -38,15 +38,11 @@ class CustomerRepository extends ServiceEntityRepository
             $this->getEntityManager()->flush();
         }
     }
-    // je crée une focntion qui va permettre de Récupérez la liste des customers
-    //avec deux paramètres (nb de page et nb de customers à récupérer
     public function findAllWithPagination($page, $limit, $user) {
         $qb = $this->createQueryBuilder('c')
             ->andWhere('c.user = :user')
             ->setParameter(':user', $user)
-            //à partir de quand nous allons récupérer les customers ;
             ->setFirstResult(($page - 1) * $limit)
-            //à savoir le nombre de customers que nous voulons retourner.
             ->setMaxResults($limit);
 
         return $qb->getQuery()->getResult();
