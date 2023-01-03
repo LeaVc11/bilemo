@@ -151,7 +151,7 @@ class CustomerController extends AbstractController
         }
         $em->persist($currentCustomer);
         $em->flush();
-        return new JsonResponse(null, Response::HTTP_NO_CONTENT);
+        return new JsonResponse(null, Response::HTTP_OK);
     }
 
 }
