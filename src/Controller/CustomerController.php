@@ -182,5 +182,4 @@ class CustomerController extends AbstractController
 //        return new JsonResponse(null, Response::HTTP_OK);
         return $this->json(null,Response::HTTP_OK);
     }
-
 }

@@ -55,3 +55,6 @@ php bin/console doctrine:fixtures:load --append
 The symfony serve command will start a PHP webserver. You can now go to your
 localhost URL : http://127.0.0.1:8000 where the blog should be displayed.
 
+
+# Api documentation
+http://127.0.0.1:8000/api/doc
