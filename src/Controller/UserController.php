@@ -3,22 +3,18 @@
 namespace App\Controller;
 
 use App\Entity\User;
-use App\Repository\CustomerRepository;
 use App\Repository\UserRepository;
-use App\Services\UserService;
-use Doctrine\ORM\EntityManagerInterface;
 use JMS\Serializer\SerializationContext;
 use JMS\Serializer\SerializerInterface;
-use Psr\Cache\InvalidArgumentException;
+use Nelmio\ApiDocBundle\Annotation\Model;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Contracts\Cache\ItemInterface;
 use Symfony\Contracts\Cache\TagAwareCacheInterface;
+use OpenApi\Attributes as OA;
 
 class UserController extends AbstractController
 {
@@ -28,6 +24,25 @@ class UserController extends AbstractController
     {
     }
     #[Route('/api/users', name: 'users', methods: ['GET'])]
+    #[OA\Response(
+        response: 200,
+        description:"Retourne la liste des users",
+        content: new OA\JsonContent(
+            type: 'array',
+            items: new OA\Items(ref: new Model(type: User::class, groups: ['getUsers']))
+        )
+    )]
+    #[OA\Parameter(
+        name: "page",
+        description: "La page que l'on veut récupérer",
+        in: "query",
+    )]
+    #[OA\Parameter(
+        name: "limit",
+        description: "Le nombre d'éléments que l'on veut récupérer",
+        in: "query",
+    )]
+    #[OA\Tag('Users')]
     public function getAllUsers(UserRepository         $userRepository,
                                 Request                $request,
                                 SerializerInterface $serializer,
@@ -49,6 +64,7 @@ class UserController extends AbstractController
         return new JsonResponse($userList, Response::HTTP_OK, [], true);
     }
     #[Route('/api/users/{id}', name: 'detail_user', methods: ['GET'])]
+    #[OA\Tag('Users')]
     public function getOnelUser(User $user, SerializerInterface $serializer): JsonResponse
     {
         $context = SerializationContext::create()->setGroups(['getUsers']);
