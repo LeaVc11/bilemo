@@ -10,10 +10,15 @@ use Symfony\Component\HttpKernel\KernelEvents;
 
 class ExceptionSubscriber implements EventSubscriberInterface
 {
+    //il y a 2 méthodes
+
+// c'es tce qu'on va faire qd on écoutes une de ces exceptions
     public function onKernelException(ExceptionEvent $event): void
     {
+        //$execption = je récupère ecxeption qui est liée à l'événement
         $exception = $event->getThrowable();
 
+        //je regarde si l'exception est une instance de httpException
         if ($exception instanceof HttpException){
             $data = [
                 'status' => $exception->getStatusCode(),
@@ -31,6 +36,7 @@ class ExceptionSubscriber implements EventSubscriberInterface
     public static function getSubscribedEvents(): array
     {
         return [
+            //ce qu'on entrain d'écouter
             KernelEvents::EXCEPTION => 'onKernelException',
         ];
     }
