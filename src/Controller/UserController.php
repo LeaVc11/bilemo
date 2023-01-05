@@ -19,7 +19,7 @@ use OpenApi\Attributes as OA;
 class UserController extends AbstractController
 {
     public function __construct(
-
+        private readonly SerializerInterface    $serializer,
     )
     {
     }
@@ -60,16 +60,17 @@ class UserController extends AbstractController
             $context = SerializationContext::create()->setGroups(['getUsers']);
             return $serializer->serialize($users, 'json', $context);
         });
+//        return $this->json($userList, Response::HTTP_OK,[]);
 
         return new JsonResponse($userList, Response::HTTP_OK, [], true);
     }
     #[Route('/api/users/{id}', name: 'detail_user', methods: ['GET'])]
     #[OA\Tag('Users')]
-    public function getOnelUser(User $user, SerializerInterface $serializer): JsonResponse
+    public function getOnelUser(User $user): JsonResponse
     {
         $context = SerializationContext::create()->setGroups(['getUsers']);
 
-        $jsonUser = $serializer->serialize($user, 'json', $context);
+        $jsonUser = $this->serializer->serialize($user, 'json', $context);
         return new JsonResponse($jsonUser, Response::HTTP_OK, [], true);
     }
 }
