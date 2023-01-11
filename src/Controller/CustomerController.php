@@ -20,10 +20,8 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Contracts\Cache\ItemInterface;
 use Symfony\Contracts\Cache\TagAwareCacheInterface;
 
-
 class CustomerController extends AbstractController
 {
-
     public function __construct(
         private readonly CustomerRepository     $customerRepository,
     )
@@ -52,30 +50,7 @@ class CustomerController extends AbstractController
         description: "Le nombre d'éléments que l'on veut récupérer",
         in: "query",
     )]
-//    /**
-//     * @OA\Response(
-//     *     response=200,
-//     *     description="Retourne la liste des customers",
-//     *     @OA\JsonContent(
-//     *        type="array",
-//     *        @OA\Items(ref=@Model(type=Customer::class, groups={"getCustomers"}))
-//     *     )
-//     * )
-//     * @OA\Parameter(
-//     *     name="page",
-//     *     in="query",
-//     *     description="La page que l'on veut récupérer",
-//     *     @OA\Schema(type="int")
-//     * )
-//     * @OA\Parameter(
-//     *     name="limit",
-//     *     in="query",
-//     *     description="Le nombre d'éléments que l'on veut récupérer",
-//     *     @OA\Schema(type="int")
-//     * )
-//     * @OA\Tag(name="Customers")
-//     *
-//     */
+
     #[OA\Tag('Customers')]
     public function getAllCustomers(SerializerInterface $serializer,
                                     CustomerRepository  $customerRepository,
@@ -147,6 +122,7 @@ class CustomerController extends AbstractController
      */
     #[Route('/api/customers/{id}', name: 'deleteCustomer', methods: ['DELETE'])]
     #[IsGranted('ROLE_ADMIN', message: 'Vous n\'avez pas les droits suffisants pour supprimer un customer')]
+    #[OA\Tag('Customers')]
     public function DeleteCustomer(Customer $customer, EntityManagerInterface $em, TagAwareCacheInterface $cache): JsonResponse
     {
         $this->denyAccessUnlessGranted('CUSTOMER_DELETE', $customer);
@@ -161,6 +137,7 @@ class CustomerController extends AbstractController
      */
     #[Route('/api/customers/{id}', name: "updateCustomer", methods: ['PUT'])]
     #[IsGranted('ROLE_ADMIN', message: 'Vous n\'avez pas les droits suffisants pour mettre à jour un customer')]
+    #[OA\Tag('Customers')]
     public function updateCustomer(Request                $request, SerializerInterface $serializer,
                                    Customer               $currentCustomer, EntityManagerInterface $em,
                                    ValidatorInterface $validator, Customer $customer,
