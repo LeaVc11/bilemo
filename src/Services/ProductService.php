@@ -21,5 +21,4 @@ class ProductService
     {
         return $this->productRepository->find($id);
     }
-
 }
