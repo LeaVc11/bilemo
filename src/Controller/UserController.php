@@ -60,8 +60,6 @@ class UserController extends AbstractController
             $context = SerializationContext::create()->setGroups(['getUsers']);
             return $serializer->serialize($users, 'json', $context);
         });
-//        return $this->json($userList, Response::HTTP_OK,[]);
-
         return new JsonResponse($userList, Response::HTTP_OK, [], true);
     }
     #[Route('/api/users/{id}', name: 'detail_user', methods: ['GET'])]

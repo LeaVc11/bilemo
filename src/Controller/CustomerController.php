@@ -93,7 +93,11 @@ class CustomerController extends AbstractController
     #[Route('/api/customers', name: 'createCustomer', methods: ['POST'])]
     #[IsGranted('ROLE_ADMIN', message: 'Vous n\'avez pas les droits suffisants pour créer un customer')]
     #[OA\Tag('Customers')]
-    public function createOneCustomer(Request $request, TagAwareCacheInterface $cache, EntityManagerInterface $em, SerializerInterface $serializer): JsonResponse
+    public function createOneCustomer(Request $request,
+                                      ValidatorInterface $validator,
+                                      TagAwareCacheInterface $cache,
+                                      EntityManagerInterface $em,
+                                      SerializerInterface $serializer): JsonResponse
     {
         {
             $user = $this->getUser();
@@ -101,21 +105,23 @@ class CustomerController extends AbstractController
             $customer = $serializer->deserialize(
                 $request->getContent(), Customer::class, 'json'
             );
-            $this->verifyCustomer($customer);
             $customer->setUser($user);
+            $errors = $validator->validate($customer);
+            if ($errors->count() > 0) {
+                return new JsonResponse($serializer->serialize($errors, 'json'), Response::HTTP_BAD_REQUEST, [], true);
+            }
             $em->persist($customer);
             $em->flush();
             return new JsonResponse($customer, Response::HTTP_CREATED);
         }
     }
-
-    private function verifyCustomer($customer): bool
-    {
-        if (!$this->customerRepository->findOneBy(['email' => $customer->getEmail()])) {
-            return true;
-        }
-        return false;
-    }
+//    private function verifyCustomer($customer): bool
+//    {
+//        if (!$this->customerRepository->findOneBy(['email' => $customer->getEmail()])) {
+//            return true;
+//        }
+//        return false;
+//    }
 
     /**
      * @throws InvalidArgumentException
@@ -157,6 +163,5 @@ class CustomerController extends AbstractController
         $em->persist($currentCustomer);
         $em->flush();
         return new JsonResponse(null, Response::HTTP_OK);
-
     }
 }

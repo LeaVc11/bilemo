@@ -13,6 +13,7 @@ use Hateoas\Configuration\Annotation as Hateoas;
 
 #[ORM\Entity(repositoryClass: CustomerRepository::class)]
 #[UniqueEntity('email')]
+#[UniqueEntity('name', message: 'Ce nom existe déjà')]
 /**
  * @Hateoas\Relation(
  *      "self",
@@ -60,11 +61,13 @@ class Customer
 
     #[ORM\Column(length: 255)]
     #[Groups(["getCustomers", "getUsers"])]
+    #[Assert\NotBlank(message: "Email est obligatoire.")]
     #[Assert\Email(message: "Votre email doit être valide.")]
     private ?string $email = null;
 
     #[ORM\ManyToOne(inversedBy: 'customer')]
     #[Groups(["getCustomers", "getUsers"])]
+
     private ?User $user = null;
 
 
