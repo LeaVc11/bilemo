@@ -23,7 +23,7 @@ use Symfony\Contracts\Cache\TagAwareCacheInterface;
 class CustomerController extends AbstractController
 {
     public function __construct(
-        private readonly CustomerRepository     $customerRepository,
+        private readonly CustomerRepository $customerRepository,
     )
     {
     }
@@ -50,12 +50,11 @@ class CustomerController extends AbstractController
         description: "Le nombre d'éléments que l'on veut récupérer",
         in: "query",
     )]
-
     #[OA\Tag('Customers')]
-    public function getAllCustomers(SerializerInterface $serializer,
-                                    CustomerRepository  $customerRepository,
+    public function getAllCustomers(SerializerInterface    $serializer,
+                                    CustomerRepository     $customerRepository,
                                     TagAwareCacheInterface $cache,
-                                    Request             $request): JsonResponse
+                                    Request                $request): JsonResponse
     {
         $page = $request->get('page', 1);
         $limit = $request->get('limit', 10);
@@ -93,18 +92,17 @@ class CustomerController extends AbstractController
     #[Route('/api/customers', name: 'createCustomer', methods: ['POST'])]
     #[IsGranted('ROLE_ADMIN', message: 'Vous n\'avez pas les droits suffisants pour créer un customer')]
     #[OA\Tag('Customers')]
-    public function createOneCustomer(Request $request,
-                                      ValidatorInterface $validator,
+    public function createOneCustomer(Request                $request,
+                                      ValidatorInterface     $validator,
                                       TagAwareCacheInterface $cache,
                                       EntityManagerInterface $em,
-                                      SerializerInterface $serializer): JsonResponse
+                                      SerializerInterface    $serializer): JsonResponse
     {
-        {
+
             $user = $this->getUser();
             $cache->invalidateTags(["customerCache"]);
-            $customer = $serializer->deserialize(
-                $request->getContent(), Customer::class, 'json'
-            );
+            $customer = $serializer->deserialize($request->getContent(), Customer::class, 'json');
+
             $customer->setUser($user);
             $errors = $validator->validate($customer);
             if ($errors->count() > 0) {
@@ -112,16 +110,10 @@ class CustomerController extends AbstractController
             }
             $em->persist($customer);
             $em->flush();
-            return new JsonResponse($customer, Response::HTTP_CREATED);
-        }
+            $jsonCustomer = $serializer->serialize($customer, 'json');
+        return new JsonResponse($jsonCustomer, Response::HTTP_CREATED, [], true);
+
     }
-//    private function verifyCustomer($customer): bool
-//    {
-//        if (!$this->customerRepository->findOneBy(['email' => $customer->getEmail()])) {
-//            return true;
-//        }
-//        return false;
-//    }
 
     /**
      * @throws InvalidArgumentException
@@ -146,7 +138,7 @@ class CustomerController extends AbstractController
     #[OA\Tag('Customers')]
     public function updateCustomer(Request                $request, SerializerInterface $serializer,
                                    Customer               $currentCustomer, EntityManagerInterface $em,
-                                   ValidatorInterface $validator, Customer $customer,
+                                   ValidatorInterface     $validator, Customer $customer,
                                    TagAwareCacheInterface $cache): JsonResponse
     {
         $this->denyAccessUnlessGranted('CUSTOMER_UPDATE', $customer);
@@ -162,6 +154,7 @@ class CustomerController extends AbstractController
         }
         $em->persist($currentCustomer);
         $em->flush();
-        return new JsonResponse(null, Response::HTTP_OK);
+        $jsonCustomer = $serializer->serialize($customer, 'json');
+        return new JsonResponse($jsonCustomer, Response::HTTP_OK,[], true);
     }
 }
